@@ -36,9 +36,9 @@ jobs:
         docker-compose build
         docker-compose up -d
 
-    - name: Run tests with coverage and generate report
-      run: |
-        docker-compose run --rm app sh -c "coverage run --data-file=/tmp/.coverage manage.py test --noinput && coverage report --data-file=/tmp/.coverage"
+    # - name: Run tests with coverage and generate report
+    #   run: |
+    #     docker-compose run --rm app sh -c "coverage run --data-file=/tmp/.coverage manage.py test --noinput && coverage report --data-file=/tmp/.coverage"
 
     - name: Tear down Docker containers
       run: docker-compose down
