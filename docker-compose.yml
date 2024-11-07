@@ -14,23 +14,11 @@ services:
              python manage.py migrate &&
              python manage.py runserver --noreload 0.0.0.0:8000"
     environment:
-      - DB_HOST=${DB_HOSTNAME}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${RDS_HOSTNAME}
+      - DB_NAME=${RDS_DB_NAME}
+      - DB_USER=${RDS_USERNAME}
+      - DB_PASSWORD=${RDS_PASSWORD}
     user: django-user # 컨테이너 내부에서 django-user로 실행
     env_file:
       - .env
-    depends_on:
-      - db
 
-  db:
-    image: postgres:16-alpine
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./data/db:/var/lib/postgres/data
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}

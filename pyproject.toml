@@ -6,9 +6,10 @@ authors = ["dayeonkimm <ekdyd516@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 django = "^5.1.2"
 psycopg2-binary = "^2.9.10"
+python-dotenv = "^1.0"
 
 
 [build-system]
