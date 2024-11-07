@@ -73,24 +73,25 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t your-dockerhub-username/your-image-name:$VERSION .
-          docker push your-dockerhub-username/your-image-name:$VERSION
-
+          docker build -t hiyoon/gamja_be-app:$VERSION .
+          docker push hiyoon/gamja_be-app:$VERSION
+      
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-ip-address << 'EOF'
-          # Pull the latest image with the version tag
-          docker pull your-dockerhub-username/your-image-name:$VERSION
+          ssh -o StrictHostKeyChecking=no ec2-user@123.456.78.90 << 'EOF'
           
-          # Stop and remove the old container (ignore errors if it doesn't exist)
-          docker stop your-container-name || true
-          docker rm your-container-name || true
+          docker pull hiyoon/gamja_be-app:$VERSION
           
-          # Start the new container with the versioned image
-          docker run -d --name your-container-name -p 8000:8000 your-dockerhub-username/your-image-name:$VERSION
+          docker stop gamja_be-app || true
+          docker rm gamja_be-app || true
+          
+          docker run -d --name gamja_be-app -p 8000:8000 hiyoon/gamja_be-app:$VERSION
           EOF
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          
+          
+
 
 
 
