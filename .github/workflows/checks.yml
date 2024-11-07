@@ -77,8 +77,9 @@ jobs:
           docker push hiyoon/gamja_be-app:$VERSION
       
       - name: Deploy to EC2
+
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@123.456.78.90 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ec2-user@43.201.150.32 << 'EOF'
           
           docker pull hiyoon/gamja_be-app:$VERSION
           
@@ -88,7 +89,7 @@ jobs:
           docker run -d --name gamja_be-app -p 8000:8000 hiyoon/gamja_be-app:$VERSION
           EOF
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           
           
 
