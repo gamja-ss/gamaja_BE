@@ -57,6 +57,11 @@ INSTALLED_APPS = [
     "programmers.apps.ProgrammersConfig",
     "stacks.apps.StacksConfig",
     "users.apps.UsersConfig",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -68,6 +73,30 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    # General schema metadata. Refer to spec for valid inputs
+    # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object
+    "TITLE": "drf-spectacular API Document",
+    "DESCRIPTION": "drf-specatular 를 사용해서 만든 API 문서입니다.",
+    "SWAGGER_UI_SETTINGS": {
+        "dom_id": "#swagger-ui",
+        "layout": "BaseLayout",
+        "deepLinking": True,
+        "displayOperationId": True,
+        "filter": True,
+    },
+    "LICENSE": {
+        "name": "MIT License",
+    },
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "//unpkg.com/swagger-ui-dist@3.38.0",
+}
 
 ROOT_URLCONF = "config.urls"
 
