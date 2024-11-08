@@ -32,7 +32,7 @@ jobs:
         echo "RDS_USERNAME=${RDS_USERNAME}" >> .env
         echo "RDS_PASSWORD=${RDS_PASSWORD}" >> .env
         echo "RDS_DB_PORT=${RDS_DB_PORT}" >> .env
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+        echo "SECRET_KEY=\"${{ secrets.SECRET_KEY }}\"" >> .env
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -41,14 +41,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y docker-compose
-
-    - name: Docker layer caching
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
 
     - name: Build and run Docker containers
       run: |
@@ -101,20 +93,20 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
+          ssh -t -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
           
-          docker pull hiyoon/gamja_be-app:${{ env.VERSION }}
-                      docker stop gamja_be-app || true
-                      docker rm gamja_be-app || true
-                      docker run -d --name gamja_be-app -p 8000:8000 \
-                        -e RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }} \
-                        -e RDS_DB_NAME=${{ secrets.RDS_DB_NAME }} \
-                        -e RDS_USERNAME=${{ secrets.RDS_USERNAME }} \
-                        -e RDS_PASSWORD=${{ secrets.RDS_PASSWORD }} \
-                        -e RDS_DB_PORT=${{ secrets.RDS_DB_PORT }} \
-                        -e SECRET_KEY=${{ secrets.SECRET_KEY }} \
+          sudo docker pull hiyoon/gamja_be-app:${{ env.VERSION }}
+          sudo docker stop gamja_be-app || true
+          sudo docker rm gamja_be-app || true
+          sudo docker run -d --name gamja_be-app -p 8000:8000 \
+                        -e RDS_HOSTNAME="${{ secrets.RDS_HOSTNAME }}" \
+                        -e RDS_DB_NAME="${{ secrets.RDS_DB_NAME }}" \
+                        -e RDS_USERNAME="${{ secrets.RDS_USERNAME }}" \
+                        -e RDS_PASSWORD="${{ secrets.RDS_PASSWORD }}" \
+                        -e RDS_DB_PORT="${{ secrets.RDS_DB_PORT }}" \
+                        -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
                         hiyoon/gamja_be-app:${{ env.VERSION }}
-                    EOF
+          EOF
 
       - name: 정리
         if: always()
