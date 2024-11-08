@@ -106,7 +106,7 @@ jobs:
                         -e RDS_DB_PORT="${{ secrets.RDS_DB_PORT }}" \
                         -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
                         hiyoon/gamja_be-app:${{ env.VERSION }}
-      EOF
+          EOF
 
       - name: 정리
         if: always()
