@@ -13,15 +13,20 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# .env 파일 로드
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-&lkbsq5mo_9n(q=9eduwkt==w#h$kvw0@%zx0psf6ki2-(30t_"
+SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -52,6 +57,11 @@ INSTALLED_APPS = [
     "programmers.apps.ProgrammersConfig",
     "stacks.apps.StacksConfig",
     "users.apps.UsersConfig",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -63,6 +73,30 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    # General schema metadata. Refer to spec for valid inputs
+    # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object
+    "TITLE": "drf-spectacular API Document",
+    "DESCRIPTION": "drf-specatular 를 사용해서 만든 API 문서입니다.",
+    "SWAGGER_UI_SETTINGS": {
+        "dom_id": "#swagger-ui",
+        "layout": "BaseLayout",
+        "deepLinking": True,
+        "displayOperationId": True,
+        "filter": True,
+    },
+    "LICENSE": {
+        "name": "MIT License",
+    },
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_DIST": "//unpkg.com/swagger-ui-dist@3.38.0",
+}
 
 ROOT_URLCONF = "config.urls"
 
@@ -91,10 +125,17 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "HOST": os.environ.get("DB_HOSTNAME"),
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USERNAME"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("RDS_HOSTNAME"),
+        "NAME": os.environ.get("RDS_DB_NAME"),
+        "USER": os.environ.get("RDS_USERNAME"),
+        "PASSWORD": os.environ.get("RDS_PASSWORD"),
+        "PORT": os.environ.get("RDS_DB_PORT", 5432),
+        "TEST": {
+            "NAME": "test_postgres",
+        },
+        "OPTIONS": {
+            "client_encoding": "UTF8",  # UTF-8 문자셋 설정
+        },
     }
 }
 
