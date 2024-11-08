@@ -32,7 +32,7 @@ jobs:
         echo "RDS_USERNAME=${RDS_USERNAME}" >> .env
         echo "RDS_PASSWORD=${RDS_PASSWORD}" >> .env
         echo "RDS_DB_PORT=${RDS_DB_PORT}" >> .env
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+        echo "SECRET_KEY=\"${{ secrets.SECRET_KEY }}\"" >> .env
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
