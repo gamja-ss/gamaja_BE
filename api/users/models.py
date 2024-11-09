@@ -8,7 +8,7 @@ from django.db import models
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, **extra_fields):
+    def create_user(self, username, email=None, **extra_fields):
         if not username:
             raise ValueError("The username must be provided")
 
@@ -40,6 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
     profile_url = models.CharField(max_length=255, null=True)
     github_id = models.CharField(max_length=255, null=True)
     baekjoon_id = models.CharField(max_length=255, null=True)
+    programmers_id = models.CharField(max_length=255, null=True)
     nickname = models.CharField(max_length=255, null=False)
 
     # 감자 관련 필드
