@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -76,13 +77,14 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }
 
 SPECTACULAR_SETTINGS = {
-    # General schema metadata. Refer to spec for valid inputs
-    # https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object
-    "TITLE": "drf-spectacular API Document",
-    "DESCRIPTION": "drf-specatular 를 사용해서 만든 API 문서입니다.",
+    "TITLE": "감자쓰 API",
+    "DESCRIPTION": "감자쓰의 API 문서입니다.",
     "SWAGGER_UI_SETTINGS": {
         "dom_id": "#swagger-ui",
         "layout": "BaseLayout",
@@ -90,12 +92,20 @@ SPECTACULAR_SETTINGS = {
         "displayOperationId": True,
         "filter": True,
     },
+    "SECURITY": [
+        {
+            "name": "Authorization",
+            "type": "http",
+            "scheme": "Bearer",
+            "bearerFormat": "JWT",
+        },
+    ],
     "LICENSE": {
         "name": "MIT License",
     },
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    "SWAGGER_UI_DIST": "//unpkg.com/swagger-ui-dist@3.38.0",
+    "SWAGGER_UI_DIST": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@latest",
 }
 
 ROOT_URLCONF = "config.urls"
@@ -158,6 +168,35 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+GITHUB_CONFIG = {
+    # key
+    "CLIENT_ID": os.getenv("GITHUB_CLIENT_ID"),
+    "CLIENT_SECRETS": os.getenv("GITHUB_CLIENT_SECRETS"),
+    # uri
+    "LOGIN_URI": "https://github.com/login/oauth/authorize",
+    "TOKEN_URI": "https://github.com/login/oauth/access_token",
+    "PROFILE_URI": "https://api.github.com/user",
+    "REDIRECT_URI": os.getenv("GITHUB_REDIRECT_URI"),
+    # type
+    "GRANT_TYPE": "authorization_code",
+    "CONTENT_TYPE": "application/x-www-form-urlencoded;charset=utf-8",
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # 액세스 토큰 만료 시간
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 리프레시 토큰 만료 시간
+    "ROTATE_REFRESH_TOKENS": False,  # 리프레시 토큰 순환 사용 여부
+    "BLACKLIST_AFTER_ROTATION": False,  # 순환 사용 시 이전 리프레시 토큰 블랙리스트 등록 여부
+    "AUTH_HEADER_TYPES": ("Bearer",),  # 인증 헤더 타입
+    "USER_ID_FIELD": "id",  # 기본 Django 사용자 모델의 ID 필드
+    "USER_ID_CLAIM": "user_id",
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",  # JWT 서명에 “HS256” 알고리즘을 사용
+    "AUTH_TOKEN_CLASSES": (
+        "rest_framework_simplejwt.tokens.AccessToken",
+    ),  # 기본적으로 AccessToken 클래스를 사용
+    "TOKEN_TYPE_CLAIM": "token_type",  # JWT에서 토큰 유형을 token_type 클레임으로 저장
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
