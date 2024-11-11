@@ -96,7 +96,7 @@ jobs:
 
       - name: Copy docker-compose.prod.yml to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.36.92.37:/home/ubuntu/app/
+          scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.36.92.37:/home/ubuntu/app/docker-compose.prod.yml
 
       - name: Deploy to EC2
         env:
