@@ -25,4 +25,5 @@ urlpatterns = [
     path("github/", include("githubs.urls")),
     path("baekjoon/", include("baekjoons.urls")),
     path("programmers/", include("programmers.urls")),
+    path("stack/", include("stacks.urls")),
 ]
