@@ -1,0 +1,17 @@
+# docker-compose.prod.yml (배포용)
+version: '3'
+services:
+  app:
+    image: hiyoon/gamja_be-app:${VERSION}  # Docker Hub 이미지로 빌드
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=${RDS_HOSTNAME}
+      - DB_NAME=${RDS_DB_NAME}
+      - DB_USER=${RDS_USERNAME}
+      - DB_PASSWORD=${RDS_PASSWORD}
+    env_file:
+      - .env

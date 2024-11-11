@@ -94,18 +94,20 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -t -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
-          
-          sudo docker pull hiyoon/gamja_be-app:${{ env.VERSION }}
-          sudo docker stop gamja_be-app || true
-          sudo docker rm gamja_be-app || true
-          sudo docker run -d --name gamja_be-app -p 8000:8000 \
-                        -e RDS_HOSTNAME="${{ secrets.RDS_HOSTNAME }}" \
-                        -e RDS_DB_NAME="${{ secrets.RDS_DB_NAME }}" \
-                        -e RDS_USERNAME="${{ secrets.RDS_USERNAME }}" \
-                        -e RDS_PASSWORD="${{ secrets.RDS_PASSWORD }}" \
-                        -e RDS_DB_PORT="${{ secrets.RDS_DB_PORT }}" \
-                        -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
-                        hiyoon/gamja_be-app:${{ env.VERSION }}
+            # 배포용 디렉토리로 이동
+            cd /home/ubuntu/app
+            
+            # .env 파일 생성
+            echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env
+            echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env
+            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+  
+            # Docker Hub에서 최신 이미지 pull 및 컨테이너 실행
+            sudo docker-compose -f docker-compose.prod.yml pull
+            sudo docker-compose -f docker-compose.prod.yml up -d
           EOF
 
       - name: 정리
