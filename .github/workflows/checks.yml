@@ -88,6 +88,10 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      - name: Copy docker-compose.prod.yml to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.36.92.37:/home/ubuntu/app/
+
       - name: Deploy to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
