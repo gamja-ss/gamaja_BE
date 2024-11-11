@@ -2,7 +2,6 @@ import requests
 
 
 class SocialLoginService:
-
     def __init__(self, client_id, redirect_uri, login_uri):
         self.client_id = client_id
         self.redirect_uri = redirect_uri
@@ -19,7 +18,6 @@ class SocialLoginService:
 
 
 class SocialLoginCallbackService:
-
     def __init__(self, client_id, client_secret, redirect_uri, token_uri, profile_uri):
         self.grant_type = "authorization_code"
         self.content_type = "application/json"

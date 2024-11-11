@@ -339,9 +339,7 @@ class UserDeleteView(generics.GenericAPIView):
         description="사용자 계정을 삭제하고 관련 토큰을 블랙리스트에 추가합니다.",
         responses={
             204: OpenApiResponse(description="회원탈퇴 성공"),
-            400: OpenApiResponse(
-                description="리프레시 토큰이 쿠키에 없거나 유효하지 않음"
-            ),
+            400: OpenApiResponse(description="리프레시 토큰이 쿠키에 없거나 유효하지 않음"),
             500: OpenApiResponse(description="서버 내부 오류"),
         },
     )
