@@ -5,15 +5,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0003_user_programmers_password'),
+        ("users", "0003_user_programmers_password"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='programmers_password',
+            model_name="user",
+            name="programmers_password",
             field=users.models.EncryptedCharField(max_length=255, null=True),
         ),
     ]

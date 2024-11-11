@@ -81,9 +81,7 @@ class GetTodayProgrammers(generics.GenericAPIView):
                 response=ProgrammersSerializer,
                 description="성공적으로 정보를 조회했습니다.",
             ),
-            404: OpenApiResponse(
-                description="오늘 날짜의 프로그래머스 정보가 없습니다."
-            ),
+            404: OpenApiResponse(description="오늘 날짜의 프로그래머스 정보가 없습니다."),
         },
     )
     def get(self, request):
