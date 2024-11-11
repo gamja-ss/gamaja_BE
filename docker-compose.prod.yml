@@ -6,8 +6,8 @@ services:
     ports:
       - "8000:8000"
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+      sh -c "python api/manage.py migrate &&
+             python api/manage.py runserver 0.0.0.0:8000"
     environment:
       - DB_HOST=${RDS_HOSTNAME}
       - DB_NAME=${RDS_DB_NAME}

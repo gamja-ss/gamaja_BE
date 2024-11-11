@@ -42,6 +42,6 @@ EXPOSE 8000
 ARG DEV=false
 
 # Django 애플리케이션 실행
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "api/manage.py", "runserver", "0.0.0.0:8000"]
 
 USER django-user
