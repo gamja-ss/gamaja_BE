@@ -5,11 +5,10 @@ name: Checks
 on:
   push:
     branches-ignore:
-      - main  # main 브랜치를 제외
-      - develop  # develop 브랜치를 제외
-      #그외의 모든 브랜치에 대해서는 CI진행
+      - main
+      - develop
     tags:
-      - 'v*.*.*'  # 'v'로 시작하는 모든 버전 태그에 대해 CD 작업 실행
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -20,7 +19,6 @@ jobs:
       RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
       RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
       RDS_DB_PORT: ${{ secrets.RDS_DB_PORT }}
-
 
     steps:
     - uses: actions/checkout@v3
@@ -47,18 +45,19 @@ jobs:
         docker-compose build
         docker-compose up -d
 
-    # - name: Run tests with coverage and generate report
-    #   run: |
-    #     docker-compose run --rm app sh -c "coverage run --data-file=/tmp/.coverage manage.py test --noinput && coverage report --data-file=/tmp/.coverage"
-
     - name: Tear down Docker containers
       run: docker-compose down
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')  # CD 작업이 태그로 시작되는 경우에만 실행
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - name: Extract version from tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
@@ -69,11 +68,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Extract version from tag
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -88,7 +82,6 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # Set up SSH to prepare for SCP
       - name: Set up SSH
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
@@ -101,22 +94,21 @@ jobs:
       - name: Deploy to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          VERSION: ${{ env.VERSION }}
         run: |
+          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
-            # 배포용 디렉토리로 이동
             cd /home/ubuntu/app
-
-            # .env 파일 생성
             echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env
             echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env
             echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
             echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
             echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-
-            # Docker Hub에서 최신 이미지 pull 및 컨테이너 실행
-            sudo docker-compose -f docker-compose.prod.yml pull
-            sudo docker-compose -f docker-compose.prod.yml up -d
+            echo "VERSION=${VERSION}" >> .env
+          
+            docker-compose -f docker-compose.prod.yml --env-file .env pull
+            docker-compose -f docker-compose.prod.yml --env-file .env up -d --no-build
           EOF
 
       - name: 정리
