@@ -30,6 +30,9 @@ COPY . .
 
 RUN chmod -R 777 /app
 
+# # PostgreSQL 클라이언트 설치
+# RUN apk update && apk add --no-cache postgresql-client
+
 # 사용자 추가 및 /app 디렉토리 소유권 변경
 RUN adduser \
     --disabled-password \
