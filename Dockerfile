@@ -41,7 +41,7 @@ EXPOSE 8000
 
 ARG DEV=false
 
-# Poetry를 통해 실행
-CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Django 애플리케이션 실행
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 USER django-user
