@@ -88,6 +88,12 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      # Set up SSH to prepare for SCP
+      - name: Set up SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+
       - name: Copy docker-compose.prod.yml to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.36.92.37:/home/ubuntu/app/
@@ -96,11 +102,10 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -t -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
             # 배포용 디렉토리로 이동
             cd /home/ubuntu/app
-            
+
             # .env 파일 생성
             echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env
             echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env
@@ -108,7 +113,7 @@ jobs:
             echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
             echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-  
+
             # Docker Hub에서 최신 이미지 pull 및 컨테이너 실행
             sudo docker-compose -f docker-compose.prod.yml pull
             sudo docker-compose -f docker-compose.prod.yml up -d
