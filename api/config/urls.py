@@ -22,6 +22,7 @@ urlpatterns = [
     ),
     # apps
     path("auth/", include("users.urls.auth_urls")),
+    path("info/", include("users.urls.info_urls")),
     path("github/", include("githubs.urls")),
     path("baekjoon/", include("baekjoons.urls")),
     path("programmers/", include("programmers.urls")),
