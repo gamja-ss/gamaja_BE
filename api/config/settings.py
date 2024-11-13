@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -204,7 +205,7 @@ SIMPLE_JWT = {
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
@@ -220,3 +221,26 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
+CELERY_BROKER_URL = f"redis://:{REDIS_PASSWORD}@redis:6379/0"
+CELERY_RESULT_BACKEND = f"redis://:{REDIS_PASSWORD}@redis:6379/0"
+
+CELERY_BEAT_SCHEDULE = {
+    "update-github-commits-every-30-minutes": {
+        "task": "githubs.tasks.update_all_users_github_commits",
+        "schedule": 30 * 60,  # 30분마다
+    },
+    "update-github-commits-at-23-55": {
+        "task": "githubs.tasks.update_all_users_github_commits",
+        "schedule": crontab(hour=23, minute=55),
+    },
+    "update-github-commits-at-23-58": {
+        "task": "githubs.tasks.update_all_users_github_commits",
+        "schedule": crontab(hour=23, minute=58),
+    },
+    "update-github-commits-at-00-00": {
+        "task": "githubs.tasks.update_all_users_github_commits",
+        "schedule": crontab(hour=0, minute=0),
+    },
+}
