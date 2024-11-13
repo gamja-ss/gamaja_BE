@@ -44,7 +44,7 @@ def get_github_commits(github_username, github_token):
 
 
 def set_initial_github_commits(user):
-    total_commits = get_github_commits(user.github_username, user.github_access_token)
+    total_commits = get_github_commits(user.username, user.github_access_token)
     if total_commits is not None:
         user.github_initial_commits = total_commits
         user.github_initial_commit_date = timezone.now().date()
@@ -61,11 +61,11 @@ def set_initial_github_commits(user):
 
 
 def update_user_github_commits(user):
-    if not user.github_access_token or not user.github_username:
+    if not user.github_access_token or not user.username:
         print(f"GitHub 정보 없음: 사용자 {user.id}")
         return None
 
-    total_commits = get_github_commits(user.github_username, user.github_access_token)
+    total_commits = get_github_commits(user.username, user.github_access_token)
     if total_commits is None:
         return None
 
