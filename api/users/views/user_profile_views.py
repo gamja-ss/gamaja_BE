@@ -13,7 +13,7 @@ class UserStack_SelectionView(generics.CreateAPIView):
 
     @extend_schema(
         methods=["POST"],
-        tags=["Account"],
+        tags=["account"],
         summary="사용자가 선택한 기술 스택 저장",
         description="사용자가 선택한 기술 스택을 저장하는 엔드포인트입니다.",
         request=UserStackSerializer,
@@ -28,11 +28,7 @@ class UserStack_SelectionView(generics.CreateAPIView):
             OpenApiExample(
                 "성공 응답",
                 value={
-                    "selected_stacks": [
-                        {"id": 1, "name": "Python"},
-                        {"id": 2, "name": "Java"},
-                        {"id": 3, "name": "JavaScript"},
-                    ],
+                    "selected_stacks": [1, 2, 3],
                 },
                 response_only=True,
                 status_codes=["201"],
