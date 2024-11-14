@@ -4,7 +4,33 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.core.exceptions import ValidationError
 from django.db import models
+
+from .encrypt_utils import decrypt, encrypt
+
+
+class EncryptedCharField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    # 암호화 처리
+    def get_prep_value(self, value):
+        if not value:
+            return None
+        try:
+            return encrypt(value)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
+    # 복호화 처리
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        try:
+            return decrypt(value)
+        except ValueError as e:
+            raise ValidationError(str(e))
 
 
 class UserManager(BaseUserManager):
@@ -38,10 +64,15 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
     # 프로필 관련 필드
     email = models.EmailField(max_length=255, null=True)
     profile_url = models.CharField(max_length=255, null=True)
+    nickname = models.CharField(max_length=255, null=False)
+
+    # 계정 관련 필드
     github_id = models.CharField(max_length=255, null=True)
+    initial_github_commits = models.IntegerField(default=0)
+    initial_github_commit_date = models.DateField(null=True, blank=True)
     baekjoon_id = models.CharField(max_length=255, null=True)
     programmers_id = models.CharField(max_length=255, null=True)
-    nickname = models.CharField(max_length=255, null=False)
+    programmers_password = EncryptedCharField(max_length=255, null=True)
 
     # 감자 관련 필드
     user_level = models.PositiveIntegerField(null=False, default=1)

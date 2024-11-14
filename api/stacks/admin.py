@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Stack, UserStack
+
+admin.site.register(Stack)
+admin.site.register(UserStack)

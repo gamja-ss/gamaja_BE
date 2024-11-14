@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from users.models import User
-from users.serializers import (
+from users.serializers.auth_serializer import (
     EmptySerializer,
     UserLogoutSerializer,
     UserTokenRefreshSerializer,
@@ -150,7 +150,7 @@ class GithubLoginCallback(generics.GenericAPIView):
 
         # 프로필 이미지 업데이트
         # 깃허브 액세스토큰 업데이트
-        # user.profile_url = user_data.get("avatar_url", user.profile_url)
+        user.profile_url = user_data.get("avatar_url", user.profile_url)
         user.github_access_token = access_token
         user.last_login = timezone.now()
         user.save()

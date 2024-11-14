@@ -21,4 +21,80 @@ services:
     user: django-user # 컨테이너 내부에서 django-user로 실행
     env_file:
       - .env
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7.0
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always # 컨테이너 자동 재시작
+    environment:
+      - REDIS_MAXMEMORY=100mb # 최대 메모리 사용량 제한
+      - REDIS_MAXMEMORY_POLICY=allkeys-lru # 메모리 정책 설정
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - DEV=true
+    volumes:
+      - ./api:/app
+    command: celery -A config worker -l info
+    environment:
+      - DB_HOST=${RDS_HOSTNAME}
+      - DB_NAME=${RDS_DB_NAME}
+      - DB_USER=${RDS_USERNAME}
+      - DB_PASSWORD=${RDS_PASSWORD}
+    user: django-user
+    env_file:
+      - .env
+    networks:
+      - app_network
+    depends_on:
+      - app
+      - redis
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - DEV=true
+    volumes:
+      - ./api:/app
+    command: celery -A config beat -l info
+    environment:
+      - DB_HOST=${RDS_HOSTNAME}
+      - DB_NAME=${RDS_DB_NAME}
+      - DB_USER=${RDS_USERNAME}
+      - DB_PASSWORD=${RDS_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    user: django-user
+    env_file:
+      - .env
+    networks:
+      - app_network
+    depends_on:
+      - app
+      - redis
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+
 
