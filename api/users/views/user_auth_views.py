@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from users.models import User
-from users.serializers import (
+from users.serializers.auth_serializer import (
     EmptySerializer,
     UserLogoutSerializer,
     UserTokenRefreshSerializer,
