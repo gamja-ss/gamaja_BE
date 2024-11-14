@@ -2,6 +2,14 @@ from rest_framework import serializers
 from stacks.models import Stack, UserStack
 from stacks.serializers import StackSerializer
 
+from .models import User
+
+
+class NicknameSerializer(serializers.Serializer):
+    nickname = serializers.CharField(
+        max_length=20, help_text="새로운 닉네임 (알파벳, 숫자, 밑줄, 한글 가능)"
+    )
+
 
 class UserStackSerializer(serializers.ModelSerializer):
     stack_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
