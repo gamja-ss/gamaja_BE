@@ -6,7 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from stacks.models import Stack, UserStack
 from users.models import User
-from users.user_profile_serializers import NicknameSerializer, UserStackSerializer
+from users.serializers.user_profile_serializers import (
+    NicknameSerializer,
+    UserStackSerializer,
+)
 
 
 # 사용자 기술스택 선택 뷰

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from stacks.models import Stack, UserStack
 from stacks.serializers import StackSerializer
 
-from .models import User
+from ..models import User
 
 
 class NicknameSerializer(serializers.Serializer):
