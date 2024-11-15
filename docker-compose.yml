@@ -12,13 +12,27 @@ services:
     command: >
       sh -c "python api/manage.py makemigrations &&
              python api/manage.py migrate &&
-             python api/manage.py runserver --noreload 0.0.0.0:8000"
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"
     environment:
       - DB_HOST=${RDS_HOSTNAME}
       - DB_NAME=${RDS_DB_NAME}
       - DB_USER=${RDS_USERNAME}
       - DB_PASSWORD=${RDS_PASSWORD}
     user: django-user # 컨테이너 내부에서 django-user로 실행
+    env_file:
+      - .env
+    networks:
+      - app_network
+
+  daphne:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    command: daphne -b 0.0.0.0 -p 8001 api.config.asgi:application
+    environment:
+      - PYTHONPATH=/app/api
     env_file:
       - .env
     networks:
@@ -89,6 +103,20 @@ services:
     depends_on:
       - app
       - redis
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80" # HTTP
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./static:/app/static
+      - ./media:/app/media
+    depends_on:
+      - app
+      - daphne
+    networks:
+      - app_network
 
 networks:
   app_network:

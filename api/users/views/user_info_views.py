@@ -1,10 +1,8 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from users.serializers.info_serializer import (
-    BaekjoonInfoSerializer,
-    ProgrammersInfoSerializer,
-)
+from users.serializers.info_serializer import (BaekjoonInfoSerializer,
+                                               ProgrammersInfoSerializer)
 
 
 class ProgrammersInfoView(generics.RetrieveUpdateAPIView):

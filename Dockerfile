@@ -14,6 +14,8 @@ RUN apk update && apk add --no-cache \
 # 필요에 따라 추가적인 패키지 설치
 # RUN apk add --no-cache <additional-packages>
 
+ENV PYTHONPATH="/app"
+
 # 설치된 패키지로 pip 설치
 WORKDIR /app
 RUN pip install poetry
@@ -24,6 +26,9 @@ COPY pyproject.toml poetry.lock ./
 # 의존성 설치 (가상 환경 생성 및 의존성 설치)
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
+
+# Daphne, Gunicorn 설치
+RUN pip install daphne gunicorn
 
 # 프로젝트 코드 복사
 COPY . .
@@ -40,11 +45,11 @@ RUN adduser \
     django-user \
     && chown -R django-user:django-user /app  # /app 디렉토리 소유권 변경
 
-EXPOSE 8000
+EXPOSE 8000 8001
 
 ARG DEV=false
 
-# Django 애플리케이션 실행
-CMD ["python", "api/manage.py", "runserver", "0.0.0.0:8000"]
+## Django 애플리케이션 실행
+#CMD ["python", "api/manage.py", "runserver", "0.0.0.0:8000"]
 
 USER django-user

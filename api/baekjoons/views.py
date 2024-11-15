@@ -227,9 +227,7 @@ class GetDateBaekjoonSP(generics.RetrieveAPIView):
         user = request.user
         date_str = request.query_params.get("date")
         if not date_str:
-            return Response(
-                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -296,9 +294,7 @@ class GetDateBaekjoonScore(generics.RetrieveAPIView):
         user = request.user
         date_str = request.query_params.get("date")
         if not date_str:
-            return Response(
-                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()

@@ -87,9 +87,7 @@ class GetTotalProgrammersInfo(generics.GenericAPIView):
                 response=ProgrammersSerializer,
                 description="성공적으로 정보를 조회했습니다.",
             ),
-            404: OpenApiResponse(
-                description="오늘 날짜의 프로그래머스 정보가 없습니다."
-            ),
+            404: OpenApiResponse(description="오늘 날짜의 프로그래머스 정보가 없습니다."),
         },
     )
     def get(self, request):
@@ -225,18 +223,14 @@ class GetDateProgrammersST(generics.RetrieveAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(
-                description="해당 날짜의 프로그래머스 정보가 없습니다"
-            ),
+            404: OpenApiResponse(description="해당 날짜의 프로그래머스 정보가 없습니다"),
         },
     )
     def get(self, request):
         user = request.user
         date_str = request.query_params.get("date")
         if not date_str:
-            return Response(
-                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -294,18 +288,14 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(
-                description="해당 날짜의 프로그래머스 정보가 없습니다"
-            ),
+            404: OpenApiResponse(description="해당 날짜의 프로그래머스 정보가 없습니다"),
         },
     )
     def get(self, request):
         user = request.user
         date_str = request.query_params.get("date")
         if not date_str:
-            return Response(
-                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -367,9 +357,7 @@ class GetPeriodProgrammersST(generics.RetrieveAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(
-                description="해당 기간의 프로그래머스 정보가 없습니다"
-            ),
+            404: OpenApiResponse(description="해당 기간의 프로그래머스 정보가 없습니다"),
         },
     )
     def get(self, request):
@@ -450,9 +438,7 @@ class GetPeriodProgrammersScore(generics.RetrieveAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(
-                description="해당 기간의 프로그래머스 정보가 없습니다"
-            ),
+            404: OpenApiResponse(description="해당 기간의 프로그래머스 정보가 없습니다"),
         },
     )
     def get(self, request):

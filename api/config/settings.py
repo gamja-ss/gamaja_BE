@@ -35,6 +35,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 AUTH_USER_MODEL = "users.User"
 
 # Application definition
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
     "common.apps.CommonConfig",
     "articles.apps.ArticlesConfig",
     "attendances.apps.AttendancesConfig",
@@ -129,6 +132,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 
 # Database
@@ -216,6 +220,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "/app/static/"
+
+# Media files(json)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/app/media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
