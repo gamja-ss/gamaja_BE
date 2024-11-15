@@ -60,7 +60,7 @@ class GetTotalGithubCommits(generics.RetrieveAPIView):
     @extend_schema(
         methods=["GET"],
         tags=["github"],
-        summary="오늘의 깃허브 커밋 수 조회",
+        summary="깃허브 전체 커밋 수 조회",
         description="사용자의 오늘 날짜 기준 깃허브 전체 커밋 수를 조회합니다",
         responses={
             200: GithubSerializer,
