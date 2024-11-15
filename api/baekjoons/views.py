@@ -1,5 +1,6 @@
 from django.utils import timezone
 from drf_spectacular.utils import (
+    OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     OpenApiTypes,
@@ -100,7 +101,6 @@ class GetTotalBaekjoonInfo(generics.GenericAPIView):
 
 
 class GetTodayBaekjoonSP(generics.RetrieveAPIView):
-    serializer_class = BaekjoonSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -110,9 +110,15 @@ class GetTodayBaekjoonSP(generics.RetrieveAPIView):
         description="오늘의 백준 푼 문제 수를 조회합니다",
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"today_solved_problem": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 백준 푼 문제 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_solved_problem": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="오늘의 백준 정보가 없습니다"),
         },
@@ -120,7 +126,6 @@ class GetTodayBaekjoonSP(generics.RetrieveAPIView):
     def get(self, request):
         user = request.user
         today = timezone.now().date()
-        yesterday = today - timezone.timedelta(days=1)
 
         try:
             today_record = Baekjoon.objects.get(user=user, date=today)
@@ -143,7 +148,6 @@ class GetTodayBaekjoonSP(generics.RetrieveAPIView):
 
 
 class GetTodayBaekjoonScore(generics.RetrieveAPIView):
-    serializer_class = BaekjoonSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -153,9 +157,15 @@ class GetTodayBaekjoonScore(generics.RetrieveAPIView):
         description="오늘의 백준 점수를 조회합니다",
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"today_score": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 백준 점수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_score": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="오늘의 백준 정보가 없습니다"),
         },
@@ -163,7 +173,6 @@ class GetTodayBaekjoonScore(generics.RetrieveAPIView):
     def get(self, request):
         user = request.user
         today = timezone.now().date()
-        yesterday = today - timezone.timedelta(days=1)
 
         try:
             today_record = Baekjoon.objects.get(user=user, date=today)
@@ -184,7 +193,6 @@ class GetTodayBaekjoonScore(generics.RetrieveAPIView):
 
 
 class GetDateBaekjoonSP(generics.RetrieveAPIView):
-    serializer_class = BaekjoonSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -202,9 +210,15 @@ class GetDateBaekjoonSP(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"date_solved_problem": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 날짜의 백준 푼 문제 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"date_solved_problem": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="해당 날짜의 백준 정보가 없습니다"),
         },
@@ -248,7 +262,6 @@ class GetDateBaekjoonSP(generics.RetrieveAPIView):
 
 
 class GetDateBaekjoonScore(generics.RetrieveAPIView):
-    serializer_class = BaekjoonSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -266,9 +279,15 @@ class GetDateBaekjoonScore(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"date_score": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 날짜의 백준 점수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"date_score": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="해당 날짜의 백준 정보가 없습니다"),
         },
@@ -308,7 +327,6 @@ class GetDateBaekjoonScore(generics.RetrieveAPIView):
 
 
 class GetPeriodBaekjoonSP(generics.RetrieveAPIView):
-    serializer_class = BaekjoonSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -332,9 +350,15 @@ class GetPeriodBaekjoonSP(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"period_solved_problem": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 백준 푼 문제 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"period_solved_problem": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="해당 기간의 백준 정보가 없습니다"),
         },
@@ -384,7 +408,6 @@ class GetPeriodBaekjoonSP(generics.RetrieveAPIView):
 
 
 class GetPeriodBaekjoonScore(generics.RetrieveAPIView):
-    serializer_class = BaekjoonSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -408,9 +431,15 @@ class GetPeriodBaekjoonScore(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"period_score": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 백준 점수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"period_score": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="해당 기간의 백준 정보가 없습니다"),
         },

@@ -1,6 +1,7 @@
 import requests
 from django.utils import timezone
 from drf_spectacular.utils import (
+    OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     OpenApiTypes,
@@ -82,19 +83,24 @@ class GetTotalGithubCommits(generics.RetrieveAPIView):
 
 
 class GetTodayGithubCommits(generics.RetrieveAPIView):
-    serializer_class = GithubSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         methods=["GET"],
         tags=["github"],
         summary="오늘의 깃허브 커밋 수 조회",
-        description="오늘의 커밋 수를 조회합니다",
+        description="오늘의 깃허브 커밋 수를 조회합니다",
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"today_commits": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 깃허브 커밋 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_commits": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="오늘의 깃허브 커밋 정보가 없습니다"),
         },
@@ -102,7 +108,6 @@ class GetTodayGithubCommits(generics.RetrieveAPIView):
     def get(self, request):
         user = request.user
         today = timezone.now().date()
-        yesterday = today - timezone.timedelta(days=1)
 
         try:
             today_record = Github.objects.get(user=user, date=today)
@@ -123,7 +128,6 @@ class GetTodayGithubCommits(generics.RetrieveAPIView):
 
 
 class GetDateGithubCommits(generics.RetrieveAPIView):
-    serializer_class = GithubSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -141,9 +145,15 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"date_commits": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 날짜의 깃허브 커밋 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"date_commits": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="해당 날짜의 깃허브 커밋 정보가 없습니다"),
         },
@@ -181,7 +191,6 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
 
 
 class GetPeriodGithubCommits(generics.RetrieveAPIView):
-    serializer_class = GithubSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -205,9 +214,15 @@ class GetPeriodGithubCommits(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"period_commits": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 기간의 깃허브 커밋 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"period_commits": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="해당 기간의 깃허브 커밋 정보가 없습니다"),
         },

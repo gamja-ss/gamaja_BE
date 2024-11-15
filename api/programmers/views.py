@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.utils import timezone
 from drf_spectacular.utils import (
+    OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     OpenApiTypes,
@@ -105,7 +106,6 @@ class GetTotalProgrammersInfo(generics.GenericAPIView):
 
 
 class GetTodayProgrammersST(generics.RetrieveAPIView):
-    serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -115,9 +115,15 @@ class GetTodayProgrammersST(generics.RetrieveAPIView):
         description="오늘의 프로그래머스 푼 문제 수를 조회합니다",
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"today_solved_problem": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 프로그래머스 푼 문제 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_solved_tests": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="오늘의 프로그래머스 정보가 없습니다"),
         },
@@ -125,7 +131,6 @@ class GetTodayProgrammersST(generics.RetrieveAPIView):
     def get(self, request):
         user = request.user
         today = timezone.now().date()
-        yesterday = today - timezone.timedelta(days=1)
 
         try:
             today_record = Programmers.objects.get(user=user, date=today)
@@ -148,7 +153,6 @@ class GetTodayProgrammersST(generics.RetrieveAPIView):
 
 
 class GetTodayProgrammersScore(generics.RetrieveAPIView):
-    serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -158,9 +162,15 @@ class GetTodayProgrammersScore(generics.RetrieveAPIView):
         description="오늘의 프로그래머스 점수를 조회합니다",
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"today_score": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="오늘의 프로그래머스 점수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_score": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(description="오늘의 프로그래머스 정보가 없습니다"),
         },
@@ -168,7 +178,6 @@ class GetTodayProgrammersScore(generics.RetrieveAPIView):
     def get(self, request):
         user = request.user
         today = timezone.now().date()
-        yesterday = today - timezone.timedelta(days=1)
 
         try:
             today_record = Programmers.objects.get(user=user, date=today)
@@ -189,7 +198,6 @@ class GetTodayProgrammersScore(generics.RetrieveAPIView):
 
 
 class GetDateProgrammersST(generics.RetrieveAPIView):
-    serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -207,9 +215,15 @@ class GetDateProgrammersST(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"date_solved_tests": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 날짜의 프로그래머스 푼 문제 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"date_solved_tests": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(
                 description="해당 날짜의 프로그래머스 정보가 없습니다"
@@ -253,7 +267,6 @@ class GetDateProgrammersST(generics.RetrieveAPIView):
 
 
 class GetDateProgrammersScore(generics.RetrieveAPIView):
-    serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -271,9 +284,15 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"date_score": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 날짜의 프로그래머스 점수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_score": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(
                 description="해당 날짜의 프로그래머스 정보가 없습니다"
@@ -315,7 +334,6 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
 
 
 class GetPeriodProgrammersST(generics.RetrieveAPIView):
-    serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -339,9 +357,15 @@ class GetPeriodProgrammersST(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"period_solved_tests": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 기간의 프로그래머스 푼 문제 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"period_solved_tests": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(
                 description="해당 기간의 프로그래머스 정보가 없습니다"
@@ -393,7 +417,6 @@ class GetPeriodProgrammersST(generics.RetrieveAPIView):
 
 
 class GetPeriodProgrammersScore(generics.RetrieveAPIView):
-    serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -417,9 +440,15 @@ class GetPeriodProgrammersScore(generics.RetrieveAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=serializers.Serializer(
-                    {"period_score": serializers.IntegerField()}
-                )
+                response=OpenApiTypes.INT,
+                description="특정 기간의 프로그래머스 점수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={"today_score": 5},
+                        response_only=True,
+                    )
+                ],
             ),
             404: OpenApiResponse(
                 description="해당 기간의 프로그래머스 정보가 없습니다"
