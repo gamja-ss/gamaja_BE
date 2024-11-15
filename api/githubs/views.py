@@ -130,7 +130,7 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
         methods=["GET"],
         tags=["github"],
         summary="특정 날짜의 깃허브 커밋 수 조회",
-        description="특정 날짜의 커밋 수를 조회합니다",
+        description="특정 날짜의 깃허브 커밋 수를 조회합니다",
         parameters=[
             OpenApiParameter(
                 name="date",
@@ -152,13 +152,15 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
         user = request.user
         date_str = request.query_params.get("date")
         if not date_str:
-            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
             date_record = Github.objects.get(user=user, date=date)
 
-            if date == user.github_initial_commit_date:
+            if date == user.github_initial_date:
                 date_commits = date_record.commit_num - user.github_initial_commits
             else:
                 previous_date = date - timezone.timedelta(days=1)
@@ -233,7 +235,7 @@ class GetPeriodGithubCommits(generics.RetrieveAPIView):
 
             end_record = Github.objects.get(user=user, date=end_date)
 
-            if start_date == user.github_initial_commit_date:
+            if start_date == user.github_initial_date:
                 period_commits = end_record.commit_num - user.github_initial_commits
             else:
                 start_record = Github.objects.get(user=user, date=start_date)
