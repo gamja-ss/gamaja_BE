@@ -1,7 +1,10 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from users.serializers.info_serializer import ProgrammersInfoSerializer
+from users.serializers.info_serializer import (
+    BaekjoonInfoSerializer,
+    ProgrammersInfoSerializer,
+)
 
 
 class ProgrammersInfoView(generics.RetrieveUpdateAPIView):
@@ -42,3 +45,32 @@ class ProgrammersInfoView(generics.RetrieveUpdateAPIView):
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
+
+
+class BaekjoonInfoView(generics.RetrieveUpdateAPIView):
+    serializer_class = BaekjoonInfoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    @extend_schema(
+        methods=["GET"],
+        tags=["info"],
+        summary="백준 정보 조회",
+        description="사용자의 백준 아이디를 조회합니다.",
+        responses={200: ProgrammersInfoSerializer},
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        methods=["PUT"],
+        tags=["info"],
+        summary="백준 정보 업데이트",
+        description="사용자의 백준 아이디를 업데이트합니다.",
+        request=BaekjoonInfoSerializer,
+        responses={200: BaekjoonInfoSerializer},
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)

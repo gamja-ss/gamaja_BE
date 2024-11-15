@@ -243,4 +243,36 @@ CELERY_BEAT_SCHEDULE = {
         "task": "githubs.tasks.update_all_users_github_commits",
         "schedule": crontab(hour=0, minute=0),
     },
+    "update_user_baekjoon_info-every-30-minutes": {
+        "task": "baekjoons.tasks.update_all_users_baekjoon_info",
+        "schedule": 30 * 60,
+    },
+    "update_user_baekjoon_info-at-23-55": {
+        "task": "baekjoons.tasks.update_all_users_baekjoon_info",
+        "schedule": crontab(hour=23, minute=55),
+    },
+    "update_user_baekjoon_info-at-23-58": {
+        "task": "baekjoons.tasks.update_all_users_baekjoon_info",
+        "schedule": crontab(hour=23, minute=58),
+    },
+    "update_user_baekjoon_info-at-00-00": {
+        "task": "baekjoons.tasks.update_all_users_baekjoon_info",
+        "schedule": crontab(hour=0, minute=0),
+    },
+    "update_user_programmers_info-every-30-minutes": {
+        "task": "programmers.tasks.update_all_users_programmers_info",
+        "schedule": 30 * 60,
+    },
+    "update_user_programmers_info-at-23-55": {
+        "task": "programmers.tasks.update_all_users_programmers_info",
+        "schedule": crontab(hour=23, minute=55),
+    },
+    "update_user_programmers_info-at-23-58": {
+        "task": "programmers.tasks.update_all_users_programmers_info",
+        "schedule": crontab(hour=23, minute=58),
+    },
+    "update_user_programmers_info-at-00-00": {
+        "task": "programmers.tasks.update_all_users_programmers_info",
+        "schedule": crontab(hour=0, minute=0),
+    },
 }

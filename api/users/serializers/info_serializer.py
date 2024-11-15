@@ -7,3 +7,9 @@ class ProgrammersInfoSerializer(serializers.ModelSerializer):
         model = User
         fields = ["programmers_id", "programmers_password"]
         extra_kwargs = {"programmers_password": {"write_only": True}}
+
+
+class BaekjoonInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["baekjoon_id"]

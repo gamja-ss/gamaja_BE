@@ -1,5 +1,8 @@
 import requests
 from django.conf import settings
+from django.utils import timezone
+
+from .models import Programmers
 
 PROGRAMMERS_SIGN_IN = "https://programmers.co.kr/api/v1/account/sign-in"
 PROGRAMMERS_USER_RECORD = "https://programmers.co.kr/api/v1/users/record"
@@ -43,3 +46,55 @@ def get_programmers_data(programmers_id, programmers_password):
     except Exception as e:
         print(f"에러 발생: {str(e)}")
     return None
+
+
+def set_initial_programmers_info(user):
+    programmers_data = get_programmers_data(
+        user.programmers_id, user.programmers_password
+    )
+    if programmers_data is not None:
+        user.programmers_initial_score = (programmers_data["score"],)
+        user.programmers_initial_solved_tests = (programmers_data["solved_tests"],)
+        user.programmers_initial_date = timezone.now().date()
+        user.save()
+
+        Programmers.objects.create(
+            user=user,
+            date=user.programmers_initial_date,
+            defaults={
+                "level": programmers_data["level"],
+                "score": programmers_data["score"],
+                "solved_tests": programmers_data["solved_tests"],
+                "rank": programmers_data["rank"],
+            },
+        )
+        print(f"초기 Programmers 정보 설정 완료: 사용자 {user.username}")
+        return True
+    return False
+
+
+def update_user_programmers_info(user):
+    if not user.programmers_id and user.programmers_password:
+        print(f"Programmers 정보 없음: 사용자 {user.id}")
+        return None
+
+    programmers_data = get_programmers_data(
+        user.programmers_id, user.programmers_password
+    )
+    if programmers_data is None:
+        return None
+
+    today = timezone.now().date()
+    programmers, created = Programmers.objects.update_or_create(
+        user=user,
+        date=today,
+        defaults={
+            "level": programmers_data["level"],
+            "score": programmers_data["score"],
+            "solved_tests": programmers_data["solved_tests"],
+            "rank": programmers_data["rank"],
+        },
+    )
+
+    print(f"Programmers 커밋 수 업데이트 성공: 사용자 {user.username}")
+    return programmers
