@@ -9,16 +9,20 @@ from drf_spectacular.utils import (
     OpenApiTypes,
     extend_schema,
 )
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Programmers
-from .serializers import ProgrammersSerializer
+from .serializers import (
+    ProgrammersDateRequestSerializer,
+    ProgrammersPeriodRequestSerializer,
+    ProgrammersSerializer,
+)
 from .utils import get_programmers_data
 
 
-class UpdateProgrammersInfo(generics.GenericAPIView):
+class UpdateProgrammersInfoView(generics.GenericAPIView):
     serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
@@ -74,7 +78,7 @@ class UpdateProgrammersInfo(generics.GenericAPIView):
         )
 
 
-class GetTotalProgrammersInfo(generics.GenericAPIView):
+class GetTotalProgrammersInfoView(generics.GenericAPIView):
     serializer_class = ProgrammersSerializer
     permission_classes = [IsAuthenticated]
 
@@ -105,7 +109,7 @@ class GetTotalProgrammersInfo(generics.GenericAPIView):
             )
 
 
-class GetTodayProgrammersSolved(generics.RetrieveAPIView):
+class GetTodayProgrammersSolvedView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -150,7 +154,7 @@ class GetTodayProgrammersSolved(generics.RetrieveAPIView):
             )
 
 
-class GetTodayProgrammersScore(generics.RetrieveAPIView):
+class GetTodayProgrammersScoreView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -195,22 +199,16 @@ class GetTodayProgrammersScore(generics.RetrieveAPIView):
             )
 
 
-class GetDateProgrammersSolved(generics.RetrieveAPIView):
+class GetDateProgrammersSolvedView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProgrammersDateRequestSerializer
 
     @extend_schema(
         methods=["GET"],
         tags=["programmers"],
         summary="특정 날짜의 프로그래머스 푼 문제 수 조회",
         description="특정 날짜의 프로그래머스 푼 문제 수를 조회합니다",
-        parameters=[
-            OpenApiParameter(
-                name="date",
-                description="조회할 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-        ],
+        request=ProgrammersDateRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.INT,
@@ -228,16 +226,15 @@ class GetDateProgrammersSolved(generics.RetrieveAPIView):
             ),
         },
     )
-    def get(self, request):
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         user = request.user
-        date_str = request.query_params.get("date")
-        if not date_str:
-            return Response(
-                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        date = serializer.validated_data["date"]
 
         try:
-            date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
             date_record = Programmers.objects.get(user=user, date=date)
 
             if date == user.programmers_initial_date:
@@ -250,11 +247,7 @@ class GetDateProgrammersSolved(generics.RetrieveAPIView):
                 date_solved = date_record.solved - previous_date_record.solved
 
             return Response({"date_solved": date_solved})
-        except ValueError:
-            return Response(
-                {"error": "올바른 날짜 형식이 아닙니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+
         except Programmers.DoesNotExist:
             return Response(
                 {"error": "해당 날짜의 프로그래머스 정보가 없습니다"},
@@ -262,22 +255,16 @@ class GetDateProgrammersSolved(generics.RetrieveAPIView):
             )
 
 
-class GetDateProgrammersScore(generics.RetrieveAPIView):
+class GetDateProgrammersScoreView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProgrammersDateRequestSerializer
 
     @extend_schema(
-        methods=["GET"],
+        methods=["POST"],
         tags=["programmers"],
         summary="특정 날짜의 프로그래머스 점수 조회",
         description="특정 날짜의 프로그래머스 점수를 조회합니다",
-        parameters=[
-            OpenApiParameter(
-                name="date",
-                description="조회할 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-        ],
+        request=ProgrammersDateRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.INT,
@@ -295,16 +282,15 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
             ),
         },
     )
-    def get(self, request):
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         user = request.user
-        date_str = request.query_params.get("date")
-        if not date_str:
-            return Response(
-                {"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        date = serializer.validated_data["date"]
 
         try:
-            date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
             date_record = Programmers.objects.get(user=user, date=date)
 
             if date == user.programmers_initial_date:
@@ -317,11 +303,7 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
                 date_score = date_record.score - previous_date_record.score
 
             return Response({"date_score": date_score})
-        except ValueError:
-            return Response(
-                {"error": "올바른 날짜 형식이 아닙니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+
         except Programmers.DoesNotExist:
             return Response(
                 {"error": "해당 날짜의 백준 정보가 없습니다"},
@@ -329,28 +311,16 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
             )
 
 
-class GetPeriodProgrammersSolved(generics.RetrieveAPIView):
+class GetPeriodProgrammersSolvedView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProgrammersPeriodRequestSerializer
 
     @extend_schema(
-        methods=["GET"],
+        methods=["POST"],
         tags=["programmers"],
         summary="특정 기간의 프로그래머스 푼 문제 수 조회",
         description="지정된 시작일부터 종료일까지의 프로그래머스 푼 문제 수를 조회합니다",
-        parameters=[
-            OpenApiParameter(
-                name="start_date",
-                description="시작 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-            OpenApiParameter(
-                name="end_date",
-                description="종료 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-        ],
+        request=ProgrammersPeriodRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.INT,
@@ -368,27 +338,22 @@ class GetPeriodProgrammersSolved(generics.RetrieveAPIView):
             ),
         },
     )
-    def get(self, request):
-        user = request.user
-        start_date_str = request.query_params.get("start_date")
-        end_date_str = request.query_params.get("end_date")
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not start_date_str or not end_date_str:
+        start_date = serializer.validated_data["start_date"]
+        end_date = serializer.validated_data["end_date"]
+        user = request.user
+
+        if start_date > end_date:
             return Response(
-                {"error": "시작일과 종료일을 모두 지정해주세요"},
+                {"error": "시작일이 종료일보다 늦을 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            start_date = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date()
-            end_date = timezone.datetime.strptime(end_date_str, "%Y-%m-%d").date()
-
-            if start_date > end_date:
-                return Response(
-                    {"error": "시작일이 종료일보다 늦을 수 없습니다"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             end_record = Programmers.objects.get(user=user, date=end_date)
 
             if start_date == user.programmers_initial_date:
@@ -398,11 +363,7 @@ class GetPeriodProgrammersSolved(generics.RetrieveAPIView):
                 period_solved = end_record.solved - start_record.solved
 
             return Response({"period_solved": period_solved})
-        except ValueError:
-            return Response(
-                {"error": "올바른 날짜 형식이 아닙니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+
         except Programmers.DoesNotExist:
             return Response(
                 {"error": "해당 기간의 프로그래머스 정보가 없습니다"},
@@ -410,28 +371,16 @@ class GetPeriodProgrammersSolved(generics.RetrieveAPIView):
             )
 
 
-class GetPeriodProgrammersScore(generics.RetrieveAPIView):
+class GetPeriodProgrammersScoreView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProgrammersPeriodRequestSerializer
 
     @extend_schema(
-        methods=["GET"],
+        methods=["POST"],
         tags=["programmers"],
         summary="특정 기간의 프로그래머스 점수 조회",
         description="지정된 시작일부터 종료일까지의 프로그래머스 점수를 조회합니다",
-        parameters=[
-            OpenApiParameter(
-                name="start_date",
-                description="시작 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-            OpenApiParameter(
-                name="end_date",
-                description="종료 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-        ],
+        request=ProgrammersPeriodRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.INT,
@@ -449,27 +398,22 @@ class GetPeriodProgrammersScore(generics.RetrieveAPIView):
             ),
         },
     )
-    def get(self, request):
-        user = request.user
-        start_date_str = request.query_params.get("start_date")
-        end_date_str = request.query_params.get("end_date")
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not start_date_str or not end_date_str:
+        start_date = serializer.validated_data["start_date"]
+        end_date = serializer.validated_data["end_date"]
+        user = request.user
+
+        if start_date > end_date:
             return Response(
-                {"error": "시작일과 종료일을 모두 지정해주세요"},
+                {"error": "시작일이 종료일보다 늦을 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            start_date = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date()
-            end_date = timezone.datetime.strptime(end_date_str, "%Y-%m-%d").date()
-
-            if start_date > end_date:
-                return Response(
-                    {"error": "시작일이 종료일보다 늦을 수 없습니다"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             end_record = Programmers.objects.get(user=user, date=end_date)
 
             if start_date == user.programmers_initial_date:
@@ -479,11 +423,7 @@ class GetPeriodProgrammersScore(generics.RetrieveAPIView):
                 period_score = end_record.score - start_record.score
 
             return Response({"period_score": period_score})
-        except ValueError:
-            return Response(
-                {"error": "올바른 날짜 형식이 아닙니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+
         except Programmers.DoesNotExist:
             return Response(
                 {"error": "해당 기간의 프로그래머스 정보가 없습니다"},

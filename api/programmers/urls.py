@@ -1,49 +1,55 @@
 from django.urls import path
 
 from .views import (
-    GetDateProgrammersScore,
-    GetDateProgrammersSolved,
-    GetPeriodProgrammersScore,
-    GetPeriodProgrammersSolved,
-    GetTodayProgrammersScore,
-    GetTodayProgrammersSolved,
-    GetTotalProgrammersInfo,
-    UpdateProgrammersInfo,
+    GetDateProgrammersScoreView,
+    GetDateProgrammersSolvedView,
+    GetPeriodProgrammersScoreView,
+    GetPeriodProgrammersSolvedView,
+    GetTodayProgrammersScoreView,
+    GetTodayProgrammersSolvedView,
+    GetTotalProgrammersInfoView,
+    UpdateProgrammersInfoView,
 )
 
 urlpatterns = [
-    path("update/", UpdateProgrammersInfo.as_view(), name="update_programmers_info"),
     path(
-        "total/", GetTotalProgrammersInfo.as_view(), name="get_total_programmers_info"
+        "update/",
+        UpdateProgrammersInfoView.as_view(),
+        name="update_programmers_info",
+    ),
+    path(
+        "total/",
+        GetTotalProgrammersInfoView.as_view(),
+        name="get_total_programmers_info",
     ),
     path(
         "today/solved/",
-        GetTodayProgrammersSolved.as_view(),
+        GetTodayProgrammersSolvedView.as_view(),
         name="get_today_programmers_solved",
     ),
     path(
         "today/score/",
-        GetTodayProgrammersScore.as_view(),
+        GetTodayProgrammersScoreView.as_view(),
         name="get_today_programmers_score",
     ),
     path(
         "date/solved/",
-        GetDateProgrammersSolved.as_view(),
+        GetDateProgrammersSolvedView.as_view(),
         name="get_date_programmers_solved",
     ),
     path(
         "date/score/",
-        GetDateProgrammersScore.as_view(),
+        GetDateProgrammersScoreView.as_view(),
         name="get_date_programmers_score",
     ),
     path(
         "period/solved/",
-        GetPeriodProgrammersSolved.as_view(),
+        GetPeriodProgrammersSolvedView.as_view(),
         name="get_period_programmers_solved",
     ),
     path(
         "period/score/",
-        GetPeriodProgrammersScore.as_view(),
+        GetPeriodProgrammersScoreView.as_view(),
         name="get_period_programmers_score",
     ),
 ]

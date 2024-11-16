@@ -87,17 +87,14 @@ class BaekjoonInfo(generics.GenericAPIView):
 
 class VerifyBaekjoonAccount(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = BaekjoonInfoSerializer
 
     @extend_schema(
         methods=["POST"],
         tags=["info"],
         summary="백준 계정 검증",
         description="제공된 백준 아이디를 검증하고, bio가 'gamjass_{username}'과 일치하는지 확인합니다.",
-        parameters=[
-            OpenApiParameter(
-                name="baekjoon_id", description="백준 아이디", required=True, type=str
-            ),
-        ],
+        request=BaekjoonInfoSerializer,
         responses={
             200: OpenApiResponse(description="계정 검증 성공"),
             400: OpenApiResponse(description="계정 검증 실패 또는 잘못된 요청"),
@@ -105,13 +102,11 @@ class VerifyBaekjoonAccount(generics.GenericAPIView):
         },
     )
     def post(self, request):
-        baekjoon_id = request.data.get("baekjoon_id")
-        if not baekjoon_id:
-            return Response(
-                {"error": "백준 아이디를 제공해야 합니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        baekjoon_id = serializer.validated_data["baekjoon_id"]
         profile = get_boj_profile(baekjoon_id)
         if profile is None:
             return Response(
@@ -120,6 +115,7 @@ class VerifyBaekjoonAccount(generics.GenericAPIView):
             )
 
         expected_bio = f"gamjass_{request.user.username}"
+        print(f"1:{expected_bio}, 2:{profile["bio"]}")
         if profile["bio"] == expected_bio:
             return Response(
                 {"message": "백준 계정이 성공적으로 검증되었습니다."},
