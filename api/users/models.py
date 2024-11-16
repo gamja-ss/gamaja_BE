@@ -68,11 +68,17 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
 
     # 계정 관련 필드
     github_id = models.CharField(max_length=255, null=True)
-    initial_github_commits = models.IntegerField(default=0)
-    initial_github_commit_date = models.DateField(null=True, blank=True)
+    github_initial_commits = models.IntegerField(null=True, blank=True)
+    github_initial_date = models.DateField(null=True, blank=True)
     baekjoon_id = models.CharField(max_length=255, null=True)
+    baekjoon_initial_solved = models.IntegerField(null=True, blank=True)
+    baekjoon_initial_score = models.IntegerField(null=True, blank=True)
+    baekjoon_initial_date = models.DateField(null=True, blank=True)
     programmers_id = models.CharField(max_length=255, null=True)
     programmers_password = EncryptedCharField(max_length=255, null=True)
+    programmers_initial_solved = models.IntegerField(null=True, blank=True)
+    programmers_initial_score = models.IntegerField(null=True, blank=True)
+    programmers_initial_date = models.DateField(null=True, blank=True)
 
     # 감자 관련 필드
     user_level = models.PositiveIntegerField(null=False, default=1)

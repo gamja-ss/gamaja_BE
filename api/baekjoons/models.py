@@ -5,7 +5,7 @@ from users.models import User
 
 class Baekjoon(TimeStampModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    solved_problem = models.IntegerField()
+    solved = models.IntegerField()
     score = models.IntegerField()
     tier = models.CharField(max_length=20)
     date = models.DateField()
