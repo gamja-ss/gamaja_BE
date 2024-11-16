@@ -1,5 +1,7 @@
-from drf_spectacular.utils import extend_schema
-from rest_framework import generics, permissions
+from baekjoons.utils import get_boj_profile
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.serializers.info_serializer import (
     BaekjoonInfoSerializer,
@@ -7,9 +9,9 @@ from users.serializers.info_serializer import (
 )
 
 
-class ProgrammersInfoView(generics.RetrieveUpdateAPIView):
+class ProgrammersInfo(generics.RetrieveUpdateAPIView):
     serializer_class = ProgrammersInfoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
@@ -47,9 +49,10 @@ class ProgrammersInfoView(generics.RetrieveUpdateAPIView):
         return super().patch(request, *args, **kwargs)
 
 
-class BaekjoonInfoView(generics.RetrieveUpdateAPIView):
+class BaekjoonInfo(generics.GenericAPIView):
     serializer_class = BaekjoonInfoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "put"]
 
     def get_object(self):
         return self.request.user
@@ -62,7 +65,9 @@ class BaekjoonInfoView(generics.RetrieveUpdateAPIView):
         responses={200: ProgrammersInfoSerializer},
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @extend_schema(
         methods=["PUT"],
@@ -73,4 +78,55 @@ class BaekjoonInfoView(generics.RetrieveUpdateAPIView):
         responses={200: BaekjoonInfoSerializer},
     )
     def put(self, request, *args, **kwargs):
-        return super().put(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class VerifyBaekjoonAccount(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        methods=["POST"],
+        tags=["info"],
+        summary="백준 계정 검증",
+        description="제공된 백준 아이디를 검증하고, bio가 'gamjass_{username}'과 일치하는지 확인합니다.",
+        parameters=[
+            OpenApiParameter(
+                name="baekjoon_id", description="백준 아이디", required=True, type=str
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(description="계정 검증 성공"),
+            400: OpenApiResponse(description="계정 검증 실패 또는 잘못된 요청"),
+            404: OpenApiResponse(description="백준 계정을 찾을 수 없음"),
+        },
+    )
+    def post(self, request):
+        baekjoon_id = request.data.get("baekjoon_id")
+        if not baekjoon_id:
+            return Response(
+                {"error": "백준 아이디를 제공해야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile = get_boj_profile(baekjoon_id)
+        if profile is None:
+            return Response(
+                {"error": "백준 계정을 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        expected_bio = f"gamjass_{request.user.username}"
+        if profile["bio"] == expected_bio:
+            return Response(
+                {"message": "백준 계정이 성공적으로 검증되었습니다."},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {"error": "계정 검증에 실패했습니다. bio를 확인해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

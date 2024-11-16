@@ -15,6 +15,7 @@ def get_boj_profile(bj_id):
             "tier": data["tier"],
             "solved": data["solvedCount"],
             "score": data["rating"],
+            "bio": data["bio"],
         }
     else:
         return None
