@@ -30,13 +30,13 @@ def get_programmers_data(programmers_id, programmers_password):
                 # 필요한 정보 추출
                 level = user_data.get("skillCheck", {}).get("level")
                 score = user_data.get("ranking", {}).get("score")
-                solved_tests = user_data.get("codingTest", {}).get("solved")
+                solved = user_data.get("codingTest", {}).get("solved")
                 rank = user_data.get("ranking", {}).get("rank")
 
                 return {
                     "level": level,
                     "score": score,
-                    "solved_tests": solved_tests,
+                    "solved": solved,
                     "rank": rank,
                 }
             else:
@@ -54,7 +54,7 @@ def set_initial_programmers_info(user):
     )
     if programmers_data is not None:
         user.programmers_initial_score = (programmers_data["score"],)
-        user.programmers_initial_solved_tests = (programmers_data["solved_tests"],)
+        user.programmers_initial_solved = (programmers_data["solved"],)
         user.programmers_initial_date = timezone.now().date()
         user.save()
 
@@ -64,7 +64,7 @@ def set_initial_programmers_info(user):
             defaults={
                 "level": programmers_data["level"],
                 "score": programmers_data["score"],
-                "solved_tests": programmers_data["solved_tests"],
+                "solved": programmers_data["solved"],
                 "rank": programmers_data["rank"],
             },
         )
@@ -91,7 +91,7 @@ def update_user_programmers_info(user):
         defaults={
             "level": programmers_data["level"],
             "score": programmers_data["score"],
-            "solved_tests": programmers_data["solved_tests"],
+            "solved": programmers_data["solved"],
             "rank": programmers_data["rank"],
         },
     )

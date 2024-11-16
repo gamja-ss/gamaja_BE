@@ -58,7 +58,7 @@ class UpdateProgrammersInfo(generics.GenericAPIView):
             defaults={
                 "level": programmers_data["level"],
                 "score": programmers_data["score"],
-                "solved_tests": programmers_data["solved_tests"],
+                "solved": programmers_data["solved"],
                 "rank": programmers_data["rank"],
                 "date": timezone.now().date(),
             },
@@ -105,7 +105,7 @@ class GetTotalProgrammersInfo(generics.GenericAPIView):
             )
 
 
-class GetTodayProgrammersST(generics.RetrieveAPIView):
+class GetTodayProgrammersSolved(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -120,7 +120,7 @@ class GetTodayProgrammersST(generics.RetrieveAPIView):
                 examples=[
                     OpenApiExample(
                         "Success Response",
-                        value={"today_solved_tests": 5},
+                        value={"today_solved": 5},
                         response_only=True,
                     )
                 ],
@@ -136,15 +136,13 @@ class GetTodayProgrammersST(generics.RetrieveAPIView):
             today_record = Programmers.objects.get(user=user, date=today)
 
             if today == user.programmers_initial_date:
-                today_st = (
-                    today_record.solved_tests - user.programmers_initial_solved_tests
-                )
+                today_solved = today_record.solved - user.programmers_initial_solved
             else:
                 yesterday = today - timezone.timedelta(days=1)
                 yesterday_record = Programmers.objects.get(user=user, date=yesterday)
-                today_st = today_record.solved_tests - yesterday_record.solved_tests
+                today_solved = today_record.solved - yesterday_record.solved
 
-            return Response({"today_solved_tests": today_st})
+            return Response({"today_solved": today_solved})
         except Programmers.DoesNotExist:
             return Response(
                 {"error": "오늘의 프로그래머스 정보가 없습니다"},
@@ -197,7 +195,7 @@ class GetTodayProgrammersScore(generics.RetrieveAPIView):
             )
 
 
-class GetDateProgrammersST(generics.RetrieveAPIView):
+class GetDateProgrammersSolved(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -220,7 +218,7 @@ class GetDateProgrammersST(generics.RetrieveAPIView):
                 examples=[
                     OpenApiExample(
                         "Success Response",
-                        value={"date_solved_tests": 5},
+                        value={"date_solved": 5},
                         response_only=True,
                     )
                 ],
@@ -243,17 +241,15 @@ class GetDateProgrammersST(generics.RetrieveAPIView):
             date_record = Programmers.objects.get(user=user, date=date)
 
             if date == user.programmers_initial_date:
-                date_st = (
-                    date_record.solved_tests - user.programmers_initial_solved_tests
-                )
+                date_solved = date_record.solved - user.programmers_initial_solved
             else:
                 previous_date = date - timezone.timedelta(days=1)
                 previous_date_record = Programmers.objects.get(
                     user=user, date=previous_date
                 )
-                date_st = date_record.solved_tests - previous_date_record.solved_tests
+                date_solved = date_record.solved - previous_date_record.solved
 
-            return Response({"date_solved_problem": date_st})
+            return Response({"date_solved": date_solved})
         except ValueError:
             return Response(
                 {"error": "올바른 날짜 형식이 아닙니다"},
@@ -333,7 +329,7 @@ class GetDateProgrammersScore(generics.RetrieveAPIView):
             )
 
 
-class GetPeriodProgrammersST(generics.RetrieveAPIView):
+class GetPeriodProgrammersSolved(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -362,7 +358,7 @@ class GetPeriodProgrammersST(generics.RetrieveAPIView):
                 examples=[
                     OpenApiExample(
                         "Success Response",
-                        value={"period_solved_tests": 5},
+                        value={"period_solved": 5},
                         response_only=True,
                     )
                 ],
@@ -396,14 +392,12 @@ class GetPeriodProgrammersST(generics.RetrieveAPIView):
             end_record = Programmers.objects.get(user=user, date=end_date)
 
             if start_date == user.programmers_initial_date:
-                period_st = (
-                    end_record.solved_tests - user.programmers_initial_solved_tests
-                )
+                period_solved = end_record.solved - user.programmers_initial_solved
             else:
                 start_record = Programmers.objects.get(user=user, date=start_date)
-                period_st = end_record.solved_tests - start_record.solved_tests
+                period_solved = end_record.solved - start_record.solved
 
-            return Response({"period_solved_tests": period_st})
+            return Response({"period_solved": period_solved})
         except ValueError:
             return Response(
                 {"error": "올바른 날짜 형식이 아닙니다"},

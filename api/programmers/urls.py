@@ -2,11 +2,11 @@ from django.urls import path
 
 from .views import (
     GetDateProgrammersScore,
-    GetDateProgrammersST,
+    GetDateProgrammersSolved,
     GetPeriodProgrammersScore,
-    GetPeriodProgrammersST,
+    GetPeriodProgrammersSolved,
     GetTodayProgrammersScore,
-    GetTodayProgrammersST,
+    GetTodayProgrammersSolved,
     GetTotalProgrammersInfo,
     UpdateProgrammersInfo,
 )
@@ -17,7 +17,9 @@ urlpatterns = [
         "total/", GetTotalProgrammersInfo.as_view(), name="get_total_programmers_info"
     ),
     path(
-        "today/st/", GetTodayProgrammersST.as_view(), name="get_today_programmersn_st"
+        "today/solved/",
+        GetTodayProgrammersSolved.as_view(),
+        name="get_today_programmers_solved",
     ),
     path(
         "today/score/",
@@ -25,9 +27,9 @@ urlpatterns = [
         name="get_today_programmers_score",
     ),
     path(
-        "date/st/",
-        GetDateProgrammersST.as_view(),
-        name="get_date_programmers_st",
+        "date/solved/",
+        GetDateProgrammersSolved.as_view(),
+        name="get_date_programmers_solved",
     ),
     path(
         "date/score/",
@@ -35,7 +37,9 @@ urlpatterns = [
         name="get_date_programmers_score",
     ),
     path(
-        "period/st/", GetPeriodProgrammersST.as_view(), name="get_period_programmers_st"
+        "period/solved/",
+        GetPeriodProgrammersSolved.as_view(),
+        name="get_period_programmers_solved",
     ),
     path(
         "period/score/",

@@ -54,8 +54,8 @@ class UpdateBaekjoonInfo(generics.GenericAPIView):
             user=user,
             date=timezone.now().date(),
             defaults={
-                "solved_problem": profile["solved_count"],
-                "score": profile["rating"],
+                "solved": profile["solved"],
+                "score": profile["score"],
                 "tier": profile["tier"],
             },
         )
@@ -100,7 +100,7 @@ class GetTotalBaekjoonInfo(generics.GenericAPIView):
             )
 
 
-class GetTodayBaekjoonSP(generics.RetrieveAPIView):
+class GetTodayBaekjoonSolved(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -115,7 +115,7 @@ class GetTodayBaekjoonSP(generics.RetrieveAPIView):
                 examples=[
                     OpenApiExample(
                         "Success Response",
-                        value={"today_solved_problem": 5},
+                        value={"today_solved": 5},
                         response_only=True,
                     )
                 ],
@@ -131,15 +131,13 @@ class GetTodayBaekjoonSP(generics.RetrieveAPIView):
             today_record = Baekjoon.objects.get(user=user, date=today)
 
             if today == user.baekjoon_initial_date:
-                today_sp = (
-                    today_record.solved_problem - user.baekjoon_initial_solved_problem
-                )
+                today_solved = today_record.solved - user.baekjoon_initial_solved
             else:
                 yesterday = today - timezone.timedelta(days=1)
                 yesterday_record = Baekjoon.objects.get(user=user, date=yesterday)
-                today_sp = today_record.solved_problem - yesterday_record.solved_problem
+                today_solved = today_record.solved - yesterday_record.solved
 
-            return Response({"today_solved_problem": today_sp})
+            return Response({"today_solved": today_solved})
         except Baekjoon.DoesNotExist:
             return Response(
                 {"error": "오늘의 백준 정보가 없습니다"},
@@ -192,7 +190,7 @@ class GetTodayBaekjoonScore(generics.RetrieveAPIView):
             )
 
 
-class GetDateBaekjoonSP(generics.RetrieveAPIView):
+class GetDateBaekjoonSolved(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -215,7 +213,7 @@ class GetDateBaekjoonSP(generics.RetrieveAPIView):
                 examples=[
                     OpenApiExample(
                         "Success Response",
-                        value={"date_solved_problem": 5},
+                        value={"date_solved": 5},
                         response_only=True,
                     )
                 ],
@@ -236,19 +234,15 @@ class GetDateBaekjoonSP(generics.RetrieveAPIView):
             date_record = Baekjoon.objects.get(user=user, date=date)
 
             if date == user.baekjoon_initial_date:
-                date_sp = (
-                    date_record.solved_problem - user.baekjoon_initial_solved_problem
-                )
+                date_solved = date_record.solved - user.baekjoon_initial_solved
             else:
                 previous_date = date - timezone.timedelta(days=1)
                 previous_date_record = Baekjoon.objects.get(
                     user=user, date=previous_date
                 )
-                date_sp = (
-                    date_record.solved_problem - previous_date_record.solved_problem
-                )
+                date_solved = date_record.solved - previous_date_record.solved
 
-            return Response({"date_solved_problem": date_sp})
+            return Response({"date_solved": date_solved})
         except ValueError:
             return Response(
                 {"error": "올바른 날짜 형식이 아닙니다"},
@@ -326,7 +320,7 @@ class GetDateBaekjoonScore(generics.RetrieveAPIView):
             )
 
 
-class GetPeriodBaekjoonSP(generics.RetrieveAPIView):
+class GetPeriodBaekjoonSolved(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -355,7 +349,7 @@ class GetPeriodBaekjoonSP(generics.RetrieveAPIView):
                 examples=[
                     OpenApiExample(
                         "Success Response",
-                        value={"period_solved_problem": 5},
+                        value={"period_solved": 5},
                         response_only=True,
                     )
                 ],
@@ -387,14 +381,12 @@ class GetPeriodBaekjoonSP(generics.RetrieveAPIView):
             end_record = Baekjoon.objects.get(user=user, date=end_date)
 
             if start_date == user.baekjoon_initial_date:
-                period_sp = (
-                    end_record.solved_problem - user.baekjoon_initial_solved_problem
-                )
+                period_solved = end_record.solved - user.baekjoon_initial_solved
             else:
                 start_record = Baekjoon.objects.get(user=user, date=start_date)
-                period_sp = end_record.solved_problem - start_record.solved_problem
+                period_solved = end_record.solved - start_record.solved
 
-            return Response({"period_solved_problem": period_sp})
+            return Response({"period_solved": period_solved})
         except ValueError:
             return Response(
                 {"error": "올바른 날짜 형식이 아닙니다"},

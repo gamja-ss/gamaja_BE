@@ -13,8 +13,8 @@ def get_boj_profile(bj_id):
         return {
             "username": data["handle"],
             "tier": data["tier"],
-            "solved_count": data["solvedCount"],
-            "rating": data["rating"],
+            "solved": data["solvedCount"],
+            "score": data["rating"],
         }
     else:
         return None
@@ -23,8 +23,8 @@ def get_boj_profile(bj_id):
 def set_initial_baekjoon_info(user):
     profile = get_boj_profile(user.baekjoon_id)
     if profile is not None:
-        user.baekjoon_initial_sovled_problem = profile["solved_count"]
-        user.baekjoon_initial_score = profile["rating"]
+        user.baekjoon_initial_sovled = profile["solved"]
+        user.baekjoon_initial_score = profile["score"]
         user.baekjoon_initial_date = timezone.now().date()
         user.save()
 
@@ -32,8 +32,8 @@ def set_initial_baekjoon_info(user):
             user=user,
             date=user.baekjoon_initial_date,
             defaults={
-                "solved_problem": profile["solved_count"],
-                "score": profile["rating"],
+                "solved": profile["solved"],
+                "score": profile["score"],
                 "tier": profile["tier"],
             },
         )
@@ -57,8 +57,8 @@ def update_user_baekjoon_info(user):
         user=user,
         date=today,
         defaults={
-            "solved_problem": profile["solved_count"],
-            "score": profile["rating"],
+            "solved": profile["solved"],
+            "score": profile["score"],
             "tier": profile["tier"],
         },
     )

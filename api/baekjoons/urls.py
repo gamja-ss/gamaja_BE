@@ -2,11 +2,11 @@ from django.urls import path
 
 from .views import (
     GetDateBaekjoonScore,
-    GetDateBaekjoonSP,
+    GetDateBaekjoonSolved,
     GetPeriodBaekjoonScore,
-    GetPeriodBaekjoonSP,
+    GetPeriodBaekjoonSolved,
     GetTodayBaekjoonScore,
-    GetTodayBaekjoonSP,
+    GetTodayBaekjoonSolved,
     GetTotalBaekjoonInfo,
     UpdateBaekjoonInfo,
 )
@@ -14,21 +14,29 @@ from .views import (
 urlpatterns = [
     path("update/", UpdateBaekjoonInfo.as_view(), name="update_baekjoon_info"),
     path("total/", GetTotalBaekjoonInfo.as_view(), name="get_total_baekjoon_info"),
-    path("today/sp/", GetTodayBaekjoonSP.as_view(), name="get_today_baekjoon_sp"),
+    path(
+        "today/solved/",
+        GetTodayBaekjoonSolved.as_view(),
+        name="get_today_baekjoon_solved",
+    ),
     path(
         "today/score/", GetTodayBaekjoonScore.as_view(), name="get_today_baekjoon_score"
     ),
     path(
-        "date/sp/",
-        GetDateBaekjoonSP.as_view(),
-        name="get_date_baekjoon_sp",
+        "date/solved/",
+        GetDateBaekjoonSolved.as_view(),
+        name="get_date_baekjoon_solved",
     ),
     path(
         "date/score/",
         GetDateBaekjoonScore.as_view(),
         name="get_date_baekjoon_score",
     ),
-    path("period/sp/", GetPeriodBaekjoonSP.as_view(), name="get_period_baekjoon_sp"),
+    path(
+        "period/solved/",
+        GetPeriodBaekjoonSolved.as_view(),
+        name="get_period_baekjoon_solved",
+    ),
     path(
         "period/score/",
         GetPeriodBaekjoonScore.as_view(),
