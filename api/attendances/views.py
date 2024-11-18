@@ -1,9 +1,10 @@
+from coins.models import Coin
+from django.db import transaction
 from django.utils.timezone import now
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Attendance
 from .serializers import AttendanceSerializer
@@ -40,26 +41,37 @@ class AttendanceView(generics.GenericAPIView):
     )
     def post(self, request):
         user = request.user
-        today = now().date()  # 서버 시간을 기준으로 오늘 날짜 가져오기
+        today = now().date()
 
         # 출석 중복 확인
         if Attendance.objects.filter(user=user, date=today).exists():
             return Response(
                 {"message": "이미 출석하셨습니다."}, status=status.HTTP_400_BAD_REQUEST
             )
+        # 코인의 원자성 보장을 위한 트랜젝션 처리
+        try:
+            with transaction.atomic():
+                # 출석 처리
+                coin_awarded = 10
+                Attendance.objects.create(user=user, date=today)
 
-        # 출석 처리
-        coin_awarded = 10
-        Attendance.objects.create(user=user, coin_awarded=coin_awarded, date=today)
-        user.total_coins += coin_awarded
-        user.save()
+                # 코인 지급 처리
+                Coin.objects.create(user=user, verb="attendance", coins=coin_awarded)
 
-        # 직렬화된 응답 데이터 생성
-        serializer = self.get_serializer(
-            data={"message": "출석이 완료되었습니다.", "coin_awarded": coin_awarded}
+                # 유저 총 코인 업데이트
+                user.total_coins += coin_awarded
+                user.save()
+
+        except Exception as e:
+            return Response(
+                {"message": "출석 처리 중 오류가 발생했습니다.", "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {"message": "출석이 완료되었습니다.", "coin_awarded": coin_awarded},
+            status=status.HTTP_201_CREATED,
         )
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         methods=["GET"],
