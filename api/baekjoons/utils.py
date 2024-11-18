@@ -1,4 +1,6 @@
 import requests
+from coins.models import Coin
+from django.db import transaction
 from django.utils import timezone
 
 from .models import Baekjoon
@@ -42,6 +44,7 @@ def set_initial_baekjoon_info(user):
     return False
 
 
+@transaction.atomic
 def update_user_baekjoon_info(user):
     if not user.baekjoon_id:
         print(f"Baekjoon 정보 없음: 사용자 {user.id}")
@@ -51,13 +54,29 @@ def update_user_baekjoon_info(user):
     if profile is None:
         return None
 
-    today = timezone.now().date()
+    now_score = profile["score"]
+    now = timezone.now()
+
+    previous_baekjoon = Baekjoon.objects.filter(user=user).order_by("-date").first()
+
+    if previous_baekjoon:
+        score_difference = now_score - previous_baekjoon.score
+        if score_difference > 0:
+            coins_earned = score_difference
+
+            Coin.objects.create(
+                user=user,
+                verb="baekjoon",
+                coins=coins_earned,
+                timestamp=now,
+            )
+
     baekjoon, created = Baekjoon.objects.update_or_create(
         user=user,
-        date=today,
+        date=now.date(),
         defaults={
             "solved": profile["solved"],
-            "score": profile["score"],
+            "score": now_score,
             "tier": profile["tier"],
         },
     )
