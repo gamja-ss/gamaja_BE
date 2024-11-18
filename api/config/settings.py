@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "programmers.apps.ProgrammersConfig",
     "stacks.apps.StacksConfig",
     "users.apps.UsersConfig",
+    "coins.apps.CoinsConfig",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",

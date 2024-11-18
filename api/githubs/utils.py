@@ -1,4 +1,6 @@
 import requests
+from coins.models import Coin
+from django.db import transaction
 from django.utils import timezone
 
 from .models import Github
@@ -58,6 +60,7 @@ def set_initial_github_commits(user):
     return False
 
 
+@transaction.atomic
 def update_user_github_commits(user):
     if not user.github_access_token or not user.username:
         print(f"GitHub 정보 없음: 사용자 {user.id}")
@@ -67,9 +70,26 @@ def update_user_github_commits(user):
     if total_commits is None:
         return None
 
-    today = timezone.now().date()
+    now = timezone.now()
+
+    previous_github = Github.objects.filter(user=user).order_by("-date", "-id").first()
+
+    if previous_github:
+        commit_difference = total_commits - previous_github.commit_num
+
+    if commit_difference > 0:
+        coins_earned = commit_difference
+
+        Coin.objects.create(
+            user=user,
+            verb="github",
+            coins=coins_earned,
+            timestamp=now,
+        )
+
+        print(f"코인 증가: 사용자 {user.username}, 획득 코인: {coins_earned}")
     github_record, created = Github.objects.update_or_create(
-        user=user, date=today, defaults={"commit_num": total_commits}
+        user=user, date=now.date(), defaults={"commit_num": total_commits}
     )
 
     print(f"GitHub 커밋 수 업데이트 성공: 사용자 {user.username}, 커밋 수 {total_commits}")
