@@ -162,13 +162,7 @@ class GetDateGithubCommitsView(generics.GenericAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-<<<<<<< HEAD
-        date_str = request.query_params.get("date")
-        if not date_str:
-            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
-=======
         date = serializer.validated_data["date"]
->>>>>>> b50f990ba08d3854e2fd97d94ef636e57d04727c
 
         try:
             date_record = Github.objects.get(user=user, date=date)

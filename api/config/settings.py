@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "programmers.apps.ProgrammersConfig",
     "stacks.apps.StacksConfig",
     "users.apps.UsersConfig",
+    "coins.apps.CoinsConfig",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -283,5 +284,15 @@ CELERY_BEAT_SCHEDULE = {
     "update_user_programmers_info-at-00-00": {
         "task": "programmers.tasks.update_all_users_programmers_info",
         "schedule": crontab(hour=0, minute=0),
+    },
+}
+
+# 웹소켓 처리 layers
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],  # Redis 서버
+        },
     },
 }

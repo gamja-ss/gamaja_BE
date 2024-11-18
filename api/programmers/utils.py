@@ -1,5 +1,7 @@
 import requests
+from coins.models import Coin
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 
 from .models import Programmers
@@ -71,6 +73,7 @@ def set_initial_programmers_info(user):
     return False
 
 
+@transaction.atomic
 def update_user_programmers_info(user):
     if not user.programmers_id and user.programmers_password:
         print(f"Programmers 정보 없음: 사용자 {user.id}")
@@ -82,13 +85,31 @@ def update_user_programmers_info(user):
     if programmers_data is None:
         return None
 
-    today = timezone.now().date()
+    now_score = (programmers_data["score"],)
+    now = timezone.now()
+
+    previous_programmers = (
+        Programmers.objects.filter(user=user).order_by("-date", "-id").first()
+    )
+
+    if previous_programmers:
+        score_difference = now_score - previous_programmers.score
+
+    if score_difference > 0:
+        coins_earned = score_difference
+
+        Coin.objects.create(
+            user=user, verb="programmers", coins=coins_earned, timestamp=now
+        )
+
+        print(f"코인 증가: 사용자 {user.username}, 획득 코인: {coins_earned}")
+
     programmers, created = Programmers.objects.update_or_create(
         user=user,
-        date=today,
+        date=now.date(),
         defaults={
             "level": programmers_data["level"],
-            "score": programmers_data["score"],
+            "score": now_score,
             "solved": programmers_data["solved"],
             "rank": programmers_data["rank"],
         },

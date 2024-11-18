@@ -1,12 +1,12 @@
+from coins.models import Coin
 from common.models import TimeStampModel
 from django.db import models
-from users.models import User  
+from users.models import User
 
 
 class Attendance(TimeStampModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attendances")
-    coin_awarded = models.PositiveSmallIntegerField(default=0)  # 지급된 코인의 수
-    date = models.DateField(auto_now_add=True)  # 출석한 날짜
+    date = models.DateField(auto_now_add=True)
 
     class Meta:
         unique_together = (
@@ -17,4 +17,18 @@ class Attendance(TimeStampModel):
         verbose_name_plural = "Attendances"
 
     def __str__(self):
-        return f"{self.user.username} - {self.date} - {self.coin_awarded} coins"
+        return f"{self.user.username} - {self.date}"
+
+    # 출석 저장 시 Coin 지급 처리
+    def save(self, *args, **kwargs):
+
+        created = not self.pk  # 출석이 새로 생성된 경우인지 확인
+        super().save(*args, **kwargs)
+
+        if created:
+            # 출석 시 코인 지급 로직 추가
+            Coin.objects.create(
+                user=self.user,
+                verb="attendance",
+                coins=10,
+            )
