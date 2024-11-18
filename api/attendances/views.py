@@ -1,6 +1,6 @@
 from django.utils.timezone import now
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,7 +9,8 @@ from .models import Attendance
 from .serializers import AttendanceSerializer
 
 
-class AttendanceView(APIView):
+class AttendanceView(generics.GenericAPIView):
+    serializer_class = AttendanceSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -53,10 +54,12 @@ class AttendanceView(APIView):
         user.total_coins += coin_awarded
         user.save()
 
-        return Response(
-            {"message": "출석이 완료되었습니다.", "coin_awarded": coin_awarded},
-            status=status.HTTP_201_CREATED,
+        # 직렬화된 응답 데이터 생성
+        serializer = self.get_serializer(
+            data={"message": "출석이 완료되었습니다.", "coin_awarded": coin_awarded}
         )
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         methods=["GET"],

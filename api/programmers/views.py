@@ -91,7 +91,9 @@ class GetTotalProgrammersInfoView(generics.GenericAPIView):
                 response=ProgrammersSerializer,
                 description="성공적으로 정보를 조회했습니다.",
             ),
-            404: OpenApiResponse(description="오늘 날짜의 프로그래머스 정보가 없습니다."),
+            404: OpenApiResponse(
+                description="오늘 날짜의 프로그래머스 정보가 없습니다."
+            ),
         },
     )
     def get(self, request):
@@ -219,7 +221,9 @@ class GetDateProgrammersSolvedView(generics.GenericAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(description="해당 날짜의 프로그래머스 정보가 없습니다"),
+            404: OpenApiResponse(
+                description="해당 날짜의 프로그래머스 정보가 없습니다"
+            ),
         },
     )
     def post(self, request):
@@ -228,13 +232,7 @@ class GetDateProgrammersSolvedView(generics.GenericAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-<<<<<<< HEAD
-        date_str = request.query_params.get("date")
-        if not date_str:
-            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
-=======
         date = serializer.validated_data["date"]
->>>>>>> b50f990ba08d3854e2fd97d94ef636e57d04727c
 
         try:
             date_record = Programmers.objects.get(user=user, date=date)
@@ -279,7 +277,9 @@ class GetDateProgrammersScoreView(generics.GenericAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(description="해당 날짜의 프로그래머스 정보가 없습니다"),
+            404: OpenApiResponse(
+                description="해당 날짜의 프로그래머스 정보가 없습니다"
+            ),
         },
     )
     def post(self, request):
@@ -288,13 +288,7 @@ class GetDateProgrammersScoreView(generics.GenericAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-<<<<<<< HEAD
-        date_str = request.query_params.get("date")
-        if not date_str:
-            return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
-=======
         date = serializer.validated_data["date"]
->>>>>>> b50f990ba08d3854e2fd97d94ef636e57d04727c
 
         try:
             date_record = Programmers.objects.get(user=user, date=date)
@@ -339,7 +333,9 @@ class GetPeriodProgrammersSolvedView(generics.GenericAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(description="해당 기간의 프로그래머스 정보가 없습니다"),
+            404: OpenApiResponse(
+                description="해당 기간의 프로그래머스 정보가 없습니다"
+            ),
         },
     )
     def post(self, request):
@@ -397,7 +393,9 @@ class GetPeriodProgrammersScoreView(generics.GenericAPIView):
                     )
                 ],
             ),
-            404: OpenApiResponse(description="해당 기간의 프로그래머스 정보가 없습니다"),
+            404: OpenApiResponse(
+                description="해당 기간의 프로그래머스 정보가 없습니다"
+            ),
         },
     )
     def post(self, request):
