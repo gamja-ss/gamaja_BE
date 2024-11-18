@@ -5,7 +5,7 @@ from users.models import User
 
 class Programmers(TimeStampModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    solved_tests = models.IntegerField()
+    solved = models.IntegerField()
     score = models.IntegerField()
     rank = models.IntegerField()
     level = models.IntegerField()

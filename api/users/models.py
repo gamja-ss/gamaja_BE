@@ -1,9 +1,6 @@
 from common.models import TimeStampModel
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    BaseUserManager,
-    PermissionsMixin,
-)
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -71,12 +68,12 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
     github_initial_commits = models.IntegerField(null=True, blank=True)
     github_initial_date = models.DateField(null=True, blank=True)
     baekjoon_id = models.CharField(max_length=255, null=True)
-    baekjoon_initial_solved_problem = models.IntegerField(null=True, blank=True)
+    baekjoon_initial_solved = models.IntegerField(null=True, blank=True)
     baekjoon_initial_score = models.IntegerField(null=True, blank=True)
     baekjoon_initial_date = models.DateField(null=True, blank=True)
     programmers_id = models.CharField(max_length=255, null=True)
     programmers_password = EncryptedCharField(max_length=255, null=True)
-    programmers_initial_solved_tests = models.IntegerField(null=True, blank=True)
+    programmers_initial_solved = models.IntegerField(null=True, blank=True)
     programmers_initial_score = models.IntegerField(null=True, blank=True)
     programmers_initial_date = models.DateField(null=True, blank=True)
 

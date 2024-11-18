@@ -7,16 +7,20 @@ from drf_spectacular.utils import (
     OpenApiTypes,
     extend_schema,
 )
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Github
-from .serializers import GithubSerializer
+from .serializers import (
+    GithubDateRequestSerializer,
+    GithubPeriodRequestSerializer,
+    GithubSerializer,
+)
 from .utils import update_user_github_commits
 
 
-class UpdateGithubCommits(generics.GenericAPIView):
+class UpdateGithubCommitsView(generics.GenericAPIView):
     serializer_class = GithubSerializer
     permission_classes = [IsAuthenticated]
 
@@ -54,7 +58,7 @@ class UpdateGithubCommits(generics.GenericAPIView):
         )
 
 
-class GetTotalGithubCommits(generics.RetrieveAPIView):
+class GetTotalGithubCommitsView(generics.RetrieveAPIView):
     serializer_class = GithubSerializer
     permission_classes = [IsAuthenticated]
 
@@ -82,7 +86,7 @@ class GetTotalGithubCommits(generics.RetrieveAPIView):
             )
 
 
-class GetTodayGithubCommits(generics.RetrieveAPIView):
+class GetTodayGithubCommitsView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -127,22 +131,16 @@ class GetTodayGithubCommits(generics.RetrieveAPIView):
             )
 
 
-class GetDateGithubCommits(generics.RetrieveAPIView):
+class GetDateGithubCommitsView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = GithubDateRequestSerializer
 
     @extend_schema(
-        methods=["GET"],
+        methods=["POST"],
         tags=["github"],
         summary="특정 날짜의 깃허브 커밋 수 조회",
         description="특정 날짜의 깃허브 커밋 수를 조회합니다",
-        parameters=[
-            OpenApiParameter(
-                name="date",
-                description="조회할 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-        ],
+        request=GithubDateRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.INT,
@@ -158,14 +156,21 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
             404: OpenApiResponse(description="해당 날짜의 깃허브 커밋 정보가 없습니다"),
         },
     )
-    def get(self, request):
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         user = request.user
+<<<<<<< HEAD
         date_str = request.query_params.get("date")
         if not date_str:
             return Response({"error": "날짜를 지정해주세요"}, status=status.HTTP_400_BAD_REQUEST)
+=======
+        date = serializer.validated_data["date"]
+>>>>>>> b50f990ba08d3854e2fd97d94ef636e57d04727c
 
         try:
-            date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
             date_record = Github.objects.get(user=user, date=date)
 
             if date == user.github_initial_date:
@@ -176,11 +181,7 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
                 date_commits = date_record.commit_num - previous_date_record.commit_num
 
             return Response({"date_commits": date_commits})
-        except ValueError:
-            return Response(
-                {"error": "올바른 날짜 형식이 아닙니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+
         except Github.DoesNotExist:
             return Response(
                 {"error": "해당 날짜의 깃허브 커밋 정보가 없습니다"},
@@ -188,28 +189,16 @@ class GetDateGithubCommits(generics.RetrieveAPIView):
             )
 
 
-class GetPeriodGithubCommits(generics.RetrieveAPIView):
+class GetPeriodGithubCommitsView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = GithubPeriodRequestSerializer
 
     @extend_schema(
-        methods=["GET"],
+        methods=["POST"],
         tags=["github"],
         summary="특정 기간의 깃허브 커밋 수 조회",
         description="지정된 시작일부터 종료일까지의 깃허브 커밋 수를 조회합니다",
-        parameters=[
-            OpenApiParameter(
-                name="start_date",
-                description="시작 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-            OpenApiParameter(
-                name="end_date",
-                description="종료 날짜 (YYYY-MM-DD)",
-                required=True,
-                type=str,
-            ),
-        ],
+        request=GithubPeriodRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=OpenApiTypes.INT,
@@ -225,27 +214,22 @@ class GetPeriodGithubCommits(generics.RetrieveAPIView):
             404: OpenApiResponse(description="해당 기간의 깃허브 커밋 정보가 없습니다"),
         },
     )
-    def get(self, request):
-        user = request.user
-        start_date_str = request.query_params.get("start_date")
-        end_date_str = request.query_params.get("end_date")
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not start_date_str or not end_date_str:
+        start_date = serializer.validated_data["start_date"]
+        end_date = serializer.validated_data["end_date"]
+        user = request.user
+
+        if start_date > end_date:
             return Response(
-                {"error": "시작일과 종료일을 모두 지정해주세요"},
+                {"error": "시작일이 종료일보다 늦을 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            start_date = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date()
-            end_date = timezone.datetime.strptime(end_date_str, "%Y-%m-%d").date()
-
-            if start_date > end_date:
-                return Response(
-                    {"error": "시작일이 종료일보다 늦을 수 없습니다"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             end_record = Github.objects.get(user=user, date=end_date)
 
             if start_date == user.github_initial_date:
@@ -255,11 +239,85 @@ class GetPeriodGithubCommits(generics.RetrieveAPIView):
                 period_commits = end_record.commit_num - start_record.commit_num
 
             return Response({"period_commits": period_commits})
-        except ValueError:
+
+        except Github.DoesNotExist:
             return Response(
-                {"error": "올바른 날짜 형식이 아닙니다"},
+                {"error": "해당 기간의 깃허브 커밋 정보가 없습니다"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class GetPeriodDailyGithubCommitsView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GithubPeriodRequestSerializer
+
+    @extend_schema(
+        methods=["POST"],
+        tags=["github"],
+        summary="특정 기간의 날짜별 깃허브 커밋 수 조회",
+        description="지정된 시작일부터 종료일까지의 날짜별 깃허브 커밋 수를 조회합니다",
+        request=GithubPeriodRequestSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description="특정 기간의 날짜별 깃허브 커밋 수",
+                examples=[
+                    OpenApiExample(
+                        "Success Response",
+                        value={
+                            "period_commits": {
+                                "2024-11-01": 3,
+                                "2024-11-02": 5,
+                                "2024-11-03": 2,
+                            }
+                        },
+                        response_only=True,
+                    )
+                ],
+            ),
+            400: OpenApiResponse(description="잘못된 요청"),
+            404: OpenApiResponse(description="해당 기간의 깃허브 커밋 정보가 없습니다"),
+        },
+    )
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        start_date = serializer.validated_data["start_date"]
+        end_date = serializer.validated_data["end_date"]
+        user = request.user
+
+        if start_date > end_date:
+            return Response(
+                {"error": "시작일이 종료일보다 늦을 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        try:
+            period_commits = {}
+            current_date = start_date
+            if current_date == user.github_initial_date:
+                prev_commit_num = user.github_initial_commits
+            else:
+                prev_date = current_date - timezone.timedelta(days=1)
+                prev_record = Github.objects.get(user=user, date=prev_date)
+                prev_commit_num = prev_record.commit_num
+
+            while current_date <= end_date:
+                try:
+                    record = Github.objects.get(user=user, date=current_date)
+
+                    daily_commits = record.commit_num - prev_commit_num
+                    period_commits[current_date.strftime("%Y-%m-%d")] = daily_commits
+                    prev_commit_num = record.commit_num
+                except Github.DoesNotExist:
+                    period_commits[current_date.strftime("%Y-%m-%d")] = 0
+
+                current_date += timezone.timedelta(days=1)
+
+            return Response({"period_commits": period_commits})
+
         except Github.DoesNotExist:
             return Response(
                 {"error": "해당 기간의 깃허브 커밋 정보가 없습니다"},

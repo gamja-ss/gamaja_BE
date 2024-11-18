@@ -30,13 +30,13 @@ def get_programmers_data(programmers_id, programmers_password):
                 # 필요한 정보 추출
                 level = user_data.get("skillCheck", {}).get("level")
                 score = user_data.get("ranking", {}).get("score")
-                solved_tests = user_data.get("codingTest", {}).get("solved")
+                solved = user_data.get("codingTest", {}).get("solved")
                 rank = user_data.get("ranking", {}).get("rank")
 
                 return {
                     "level": level,
                     "score": score,
-                    "solved_tests": solved_tests,
+                    "solved": solved,
                     "rank": rank,
                 }
             else:
@@ -53,20 +53,18 @@ def set_initial_programmers_info(user):
         user.programmers_id, user.programmers_password
     )
     if programmers_data is not None:
-        user.programmers_initial_score = (programmers_data["score"],)
-        user.programmers_initial_solved_tests = (programmers_data["solved_tests"],)
+        user.programmers_initial_score = programmers_data["score"]
+        user.programmers_initial_solved = programmers_data["solved"]
         user.programmers_initial_date = timezone.now().date()
         user.save()
 
         Programmers.objects.create(
             user=user,
             date=user.programmers_initial_date,
-            defaults={
-                "level": programmers_data["level"],
-                "score": programmers_data["score"],
-                "solved_tests": programmers_data["solved_tests"],
-                "rank": programmers_data["rank"],
-            },
+            level=programmers_data["level"],
+            score=programmers_data["score"],
+            solved=programmers_data["solved"],
+            rank=programmers_data["rank"],
         )
         print(f"초기 Programmers 정보 설정 완료: 사용자 {user.username}")
         return True
@@ -91,10 +89,10 @@ def update_user_programmers_info(user):
         defaults={
             "level": programmers_data["level"],
             "score": programmers_data["score"],
-            "solved_tests": programmers_data["solved_tests"],
+            "solved": programmers_data["solved"],
             "rank": programmers_data["rank"],
         },
     )
 
-    print(f"Programmers 커밋 수 업데이트 성공: 사용자 {user.username}")
+    print(f"Programmers 정보 업데이트 성공: 사용자 {user.username}")
     return programmers

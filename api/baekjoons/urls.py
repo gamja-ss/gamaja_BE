@@ -1,37 +1,47 @@
 from django.urls import path
 
 from .views import (
-    GetDateBaekjoonScore,
-    GetDateBaekjoonSP,
-    GetPeriodBaekjoonScore,
-    GetPeriodBaekjoonSP,
-    GetTodayBaekjoonScore,
-    GetTodayBaekjoonSP,
-    GetTotalBaekjoonInfo,
-    UpdateBaekjoonInfo,
+    GetDateBaekjoonScoreView,
+    GetDateBaekjoonSolvedView,
+    GetPeriodBaekjoonScoreView,
+    GetPeriodBaekjoonSolvedView,
+    GetTodayBaekjoonScoreView,
+    GetTodayBaekjoonSolvedView,
+    GetTotalBaekjoonInfoView,
+    UpdateBaekjoonInfoView,
 )
 
 urlpatterns = [
-    path("update/", UpdateBaekjoonInfo.as_view(), name="update_baekjoon_info"),
-    path("total/", GetTotalBaekjoonInfo.as_view(), name="get_total_baekjoon_info"),
-    path("today/sp/", GetTodayBaekjoonSP.as_view(), name="get_today_baekjoon_sp"),
+    path("update/", UpdateBaekjoonInfoView.as_view(), name="update_baekjoon_info"),
+    path("total/", GetTotalBaekjoonInfoView.as_view(), name="get_total_baekjoon_info"),
     path(
-        "today/score/", GetTodayBaekjoonScore.as_view(), name="get_today_baekjoon_score"
+        "today/solved/",
+        GetTodayBaekjoonSolvedView.as_view(),
+        name="get_today_baekjoon_solved",
     ),
     path(
-        "date/sp/",
-        GetDateBaekjoonSP.as_view(),
-        name="get_date_baekjoon_sp",
+        "today/score/",
+        GetTodayBaekjoonScoreView.as_view(),
+        name="get_today_baekjoon_score",
+    ),
+    path(
+        "date/solved/",
+        GetDateBaekjoonSolvedView.as_view(),
+        name="get_date_baekjoon_solved",
     ),
     path(
         "date/score/",
-        GetDateBaekjoonScore.as_view(),
+        GetDateBaekjoonScoreView.as_view(),
         name="get_date_baekjoon_score",
     ),
-    path("period/sp/", GetPeriodBaekjoonSP.as_view(), name="get_period_baekjoon_sp"),
+    path(
+        "period/solved/",
+        GetPeriodBaekjoonSolvedView.as_view(),
+        name="get_period_baekjoon_solved",
+    ),
     path(
         "period/score/",
-        GetPeriodBaekjoonScore.as_view(),
+        GetPeriodBaekjoonScoreView.as_view(),
         name="get_period_baekjoon_score",
     ),
 ]
