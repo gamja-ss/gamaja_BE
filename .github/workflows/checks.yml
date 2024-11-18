@@ -77,7 +77,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: hiyoon/gamja_be-app:${{ env.VERSION }}
+          tags: |
+            hiyoon/gamja_be-app:${{ env.VERSION }}
+            hiyoon/gamja_be-daphne:${{ env.VERSION }}
+            hiyoon/gamja_be-celery:${{ env.VERSION }}
+            hiyoon/gamja_be-celery-beat:${{ env.VERSION }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -109,6 +113,11 @@ jobs:
             echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
             echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "GITHUB_CLIENT_ID=${{ secrets.KITHUB_CLIENT_ID }}" >> .env
+            echo "GITHUB_CLIENT_SECRETS=${{ secrets.KITHUB_CLIENT_SECRETS }}" >> .env
+            echo "GITHUB_REDIRECT_URI=${{ secrets.KITHUB_REDIRECT_URI }}" >> .env
+            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
             echo "VERSION=${VERSION}" >> .env
           
             docker-compose -f docker-compose.prod.yml --env-file .env pull
