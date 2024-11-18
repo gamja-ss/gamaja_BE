@@ -85,6 +85,10 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
     user_exp = models.PositiveIntegerField(null=False, default=0)
     total_coins = models.PositiveIntegerField(default=0)
 
+    def update_total_coins(self):
+        self.total_coins = self.coins.aggregate(total=models.Sum("coins"))["total"] or 0
+        self.save()
+
     # Permissions Mixin : 유저의 권한 관리
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
