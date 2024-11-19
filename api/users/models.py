@@ -65,6 +65,8 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
     email = models.EmailField(max_length=255, null=True)
     profile_url = models.CharField(max_length=255, null=True)
     nickname = models.CharField(max_length=255, null=False)
+    followers_count = models.PositiveIntegerField(default=0)
+    following_count = models.PositiveIntegerField(default=0)
 
     # 계정 관련 필드
     github_id = models.CharField(max_length=255, null=True)
