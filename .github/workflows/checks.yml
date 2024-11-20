@@ -73,15 +73,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (app only)
         uses: docker/build-push-action@v2
         with:
           push: true
           tags: |
             hiyoon/gamja_be-app:${{ env.VERSION }}
-            hiyoon/gamja_be-daphne:${{ env.VERSION }}
-            hiyoon/gamja_be-celery:${{ env.VERSION }}
-            hiyoon/gamja_be-celery-beat:${{ env.VERSION }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -99,7 +96,7 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.36.92.37:/home/ubuntu/app/docker-compose.prod.yml
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 (app only)
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           VERSION: ${{ env.VERSION }}
@@ -119,11 +116,11 @@ jobs:
             echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env
             echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
             echo "VERSION=${VERSION}" >> .env
-          
-            docker-compose -f docker-compose.prod.yml --env-file .env pull
-            docker-compose -f docker-compose.prod.yml --env-file .env up -d --no-build
+            docker-compose -f docker-compose.prod.yml --env-file .env pull app
+            docker-compose -f docker-compose.prod.yml --env-file .env up -d app
           EOF
 
-      - name: 정리
+      - name: Clean up
         if: always()
         run: rm -f private_key
+

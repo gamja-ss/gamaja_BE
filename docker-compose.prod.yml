@@ -86,8 +86,10 @@ services:
     image: nginx:latest  # Nginx 컨테이너
     ports:
       - "80:80"  # HTTP 포트
+      - "443:443" #HTTPS 포트
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./static:/app/static
       - ./media:/app/media
     depends_on:
