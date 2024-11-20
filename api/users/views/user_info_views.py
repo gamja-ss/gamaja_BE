@@ -1,12 +1,11 @@
 from baekjoons.utils import get_boj_profile
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.utils import (OpenApiParameter, OpenApiResponse,
+                                   extend_schema)
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from users.serializers.info_serializer import (
-    BaekjoonInfoSerializer,
-    ProgrammersInfoSerializer,
-)
+from users.serializers.info_serializer import (BaekjoonInfoSerializer,
+                                               ProgrammersInfoSerializer)
 
 
 class ProgrammersInfo(generics.RetrieveUpdateAPIView):

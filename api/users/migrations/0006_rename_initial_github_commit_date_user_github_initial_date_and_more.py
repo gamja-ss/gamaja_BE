@@ -4,54 +4,53 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0005_user_initial_github_commit_date_and_more'),
+        ("users", "0005_user_initial_github_commit_date_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='user',
-            old_name='initial_github_commit_date',
-            new_name='github_initial_date',
+            model_name="user",
+            old_name="initial_github_commit_date",
+            new_name="github_initial_date",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='initial_github_commits',
+            model_name="user",
+            name="initial_github_commits",
         ),
         migrations.AddField(
-            model_name='user',
-            name='baekjoon_initial_date',
+            model_name="user",
+            name="baekjoon_initial_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='baekjoon_initial_score',
+            model_name="user",
+            name="baekjoon_initial_score",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='baekjoon_initial_solved_problem',
+            model_name="user",
+            name="baekjoon_initial_solved_problem",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='github_initial_commits',
+            model_name="user",
+            name="github_initial_commits",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='programmers_initial_date',
+            model_name="user",
+            name="programmers_initial_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='programmers_initial_score',
+            model_name="user",
+            name="programmers_initial_score",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='programmers_initial_solved_tests',
+            model_name="user",
+            name="programmers_initial_solved_tests",
             field=models.IntegerField(blank=True, null=True),
         ),
     ]

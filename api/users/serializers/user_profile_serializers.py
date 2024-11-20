@@ -2,7 +2,7 @@ from rest_framework import serializers
 from stacks.models import Stack, UserStack
 from stacks.serializers import StackSerializer
 
-from .models import User
+from ..models import User
 
 
 class NicknameSerializer(serializers.Serializer):
@@ -32,3 +32,9 @@ class UserStackSerializer(serializers.ModelSerializer):
             selected_stacks.append(user_stack)
 
         return {"selected_stacks": selected_stacks}
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "nickname"]

@@ -1,6 +1,6 @@
 # Github Actions CI/CD
 
-name: Checks
+name: CI/CD Pipeline
 
 on:
   push:
@@ -19,18 +19,36 @@ jobs:
       RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
       RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
       RDS_DB_PORT: ${{ secrets.RDS_DB_PORT }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      GITHUB_CLIENT_ID: ${{ secrets.KITHUB_CLIENT_ID }}
+      GITHUB_CLIENT_SECRETS: ${{ secrets.KITHUB_CLIENT_SECRETS }}
+      GITHUB_REDIRECT_URI: ${{ secrets.KITHUB_REDIRECT_URI }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      COOKIE_SAMESITE: ${{ secrets.COOKIE_SAMESITE_DEV }}
+      COOKIE_SECURE: ${{ secrets.COOKIE_SECURE_DEV }}
+      COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN_DEV }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      DJANGO_ENV: development
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Create .env file
       run: |
-        echo "RDS_HOSTNAME=${RDS_HOSTNAME}" >> .env
-        echo "RDS_DB_NAME=${RDS_DB_NAME}" >> .env
-        echo "RDS_USERNAME=${RDS_USERNAME}" >> .env
-        echo "RDS_PASSWORD=${RDS_PASSWORD}" >> .env
-        echo "RDS_DB_PORT=${RDS_DB_PORT}" >> .env
-        echo "SECRET_KEY=\"${{ secrets.SECRET_KEY }}\"" >> .env
+        echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env.dev
+        echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env.dev
+        echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env.dev
+        echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env.dev
+        echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env.dev
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.dev
+        echo "GITHUB_CLIENT_ID=${{ secrets.KITHUB_CLIENT_ID }}" >> .env.dev
+        echo "GITHUB_CLIENT_SECRETS=${{ secrets.KITHUB_CLIENT_SECRETS }}" >> .env.dev
+        echo "GITHUB_REDIRECT_URI=${{ secrets.KITHUB_REDIRECT_URI }}" >> .env.dev
+        echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env.dev
+        echo "COOKIE_SAMESITE=${{ secrets.COOKIE_SAMESITE_DEV }}" > .env.dev
+        echo "COOKIE_SECURE=${{ secrets.COOKIE_SECURE_DEV }}" >> .env.dev
+        echo "COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN_DEV }}" >> .env.dev
+        echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env.dev
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -73,11 +91,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (app only)
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: hiyoon/gamja_be-app:${{ env.VERSION }}
+          tags: |
+            hiyoon/gamja_be-app:${{ env.VERSION }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -95,26 +114,66 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.36.92.37:/home/ubuntu/app/docker-compose.prod.yml
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 (main branch and tags for prod)
+        if: github.ref_name == 'main' && startsWith(github.ref, 'refs/tags/v')
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           VERSION: ${{ env.VERSION }}
+          DJANGO_ENV: production
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
             cd /home/ubuntu/app
-            echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env
-            echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env
-            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
-            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
-            echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-            echo "VERSION=${VERSION}" >> .env
-          
-            docker-compose -f docker-compose.prod.yml --env-file .env pull
-            docker-compose -f docker-compose.prod.yml --env-file .env up -d --no-build
+            echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env.prod
+            echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env.prod
+            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env.prod
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env.prod
+            echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env.prod
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.prod
+            echo "GITHUB_CLIENT_ID=${{ secrets.KITHUB_CLIENT_ID }}" >> .env.prod
+            echo "GITHUB_CLIENT_SECRETS=${{ secrets.KITHUB_CLIENT_SECRETS }}" >> .env.prod
+            echo "GITHUB_REDIRECT_URI=${{ secrets.KITHUB_REDIRECT_URI }}" >> .env.prod
+            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env.prod
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env.prod
+            echo "COOKIE_SAMESITE=${{ secrets.COOKIE_SAMESITE_PROD }}" > .env.prod
+            echo "COOKIE_SECURE=${{ secrets.COOKIE_SECURE_PROD }}" >> .env.prod
+            echo "COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN_PROD }}" >> .env.prod
+            echo "VERSION=${VERSION}" >> .env.prod
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod pull app
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d app
+            
           EOF
 
-      - name: 정리
+      - name: Deploy to EC2 (other branches and tags for dev)
+        if: github.ref_name != 'main' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          VERSION: ${{ env.VERSION }}
+          DJANGO_ENV: development
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
+            cd /home/ubuntu/app
+            echo "RDS_HOSTNAME=${{ secrets.RDS_HOSTNAME }}" > .env.dev
+            echo "RDS_DB_NAME=${{ secrets.RDS_DB_NAME }}" >> .env.dev
+            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env.dev
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env.dev
+            echo "RDS_DB_PORT=${{ secrets.RDS_DB_PORT }}" >> .env.dev
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.dev
+            echo "GITHUB_CLIENT_ID=${{ secrets.KITHUB_CLIENT_ID }}" >> .env.dev
+            echo "GITHUB_CLIENT_SECRETS=${{ secrets.KITHUB_CLIENT_SECRETS }}" >> .env.dev
+            echo "GITHUB_REDIRECT_URI=${{ secrets.KITHUB_REDIRECT_URI }}" >> .env.dev
+            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env.dev
+            echo "COOKIE_SAMESITE=${{ secrets.COOKIE_SAMESITE_DEV }}" > .env.dev
+            echo "COOKIE_SECURE=${{ secrets.COOKIE_SECURE_DEV }}" >> .env.dev
+            echo "COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN_DEV }}" >> .env.dev
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env.dev
+            echo "VERSION=${VERSION}" >> .env.dev
+            docker-compose -f docker-compose.prod.yml --env-file .env.dev pull app
+            docker-compose -f docker-compose.prod.yml --env-file .env.dev up -d app
+          EOF
+
+      - name: Clean up
         if: always()
         run: rm -f private_key
+

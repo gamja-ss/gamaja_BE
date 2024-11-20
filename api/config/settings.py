@@ -20,8 +20,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# .env 파일 로드
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# 환경 변수에 따라 다른 .env 파일 로드
+env_file = ".env.dev" if os.getenv("DJANGO_ENV") == "development" else ".env.prod"
+load_dotenv(os.path.join(BASE_DIR, env_file))
 
 
 # Quick-start development settings - unsuitable for production
@@ -33,7 +34,54 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "0.0.0.0",
+    "localhost",
+    "127.0.0.1",
+    "3.36.92.37",
+    ".gamjass.xyz",
+    "api.gamjass.xyz",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "https://gamjass.xyz",
+    "https://api.gamjass.xyz",
+    "http://3.36.92.37",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "cache-control",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1:5173",
+    "https://gamjass.xyz",
+    "https://api.gamjass.xyz",
+]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -45,6 +93,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
     "common.apps.CommonConfig",
     "articles.apps.ArticlesConfig",
     "attendances.apps.AttendancesConfig",
@@ -130,6 +179,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 
 # Database
@@ -217,6 +267,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "/app/static/"
+
+# Media files(json)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/app/media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -275,5 +330,17 @@ CELERY_BEAT_SCHEDULE = {
     "update_user_programmers_info-at-00-00": {
         "task": "programmers.tasks.update_all_users_programmers_info",
         "schedule": crontab(hour=0, minute=0),
+    },
+}
+
+# 웹소켓 처리 layers
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                f"redis://:{REDIS_PASSWORD}@redis:6379/0"
+            ],  # Redis URL에 인증 정보 포함
+        },
     },
 }

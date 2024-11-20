@@ -281,6 +281,7 @@ class GetDateBaekjoonScoreView(generics.GenericAPIView):
         user = request.user
         date = serializer.validated_data["date"]
 
+
         try:
             date_record = Baekjoon.objects.get(user=user, date=date)
 

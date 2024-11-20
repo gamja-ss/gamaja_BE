@@ -13,7 +13,7 @@ COIN_TYPES = (
 class Coin(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="coins")
     verb = models.CharField(max_length=255, choices=COIN_TYPES)
-    coins = models.PositiveIntegerField()
+    coins = models.IntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

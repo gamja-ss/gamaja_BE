@@ -85,7 +85,7 @@ def update_user_programmers_info(user):
     if programmers_data is None:
         return None
 
-    now_score = (programmers_data["score"],)
+    now_score = programmers_data["score"]
     now = timezone.now()
 
     previous_programmers = (

@@ -28,4 +28,6 @@ urlpatterns = [
     path("baekjoon/", include("baekjoons.urls")),
     path("programmers/", include("programmers.urls")),
     path("stack/", include("stacks.urls")),
+    path("attendance/", include("attendances.urls")),
+    path("follow/", include("follows.urls")),
 ]

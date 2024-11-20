@@ -4,20 +4,22 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0006_rename_initial_github_commit_date_user_github_initial_date_and_more'),
+        (
+            "users",
+            "0006_rename_initial_github_commit_date_user_github_initial_date_and_more",
+        ),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='user',
-            old_name='baekjoon_initial_solved_problem',
-            new_name='baekjoon_initial_solved',
+            model_name="user",
+            old_name="baekjoon_initial_solved_problem",
+            new_name="baekjoon_initial_solved",
         ),
         migrations.RenameField(
-            model_name='user',
-            old_name='programmers_initial_solved_tests',
-            new_name='programmers_initial_solved',
+            model_name="user",
+            old_name="programmers_initial_solved_tests",
+            new_name="programmers_initial_solved",
         ),
     ]
