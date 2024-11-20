@@ -33,9 +33,47 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "0.0.0.0",
+    "localhost",
+    "127.0.0.1",
+    "3.36.92.37",
+    ".gamjass.xyz",
+    "api.gamjass.xyz",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "https://gamjass.xyz",
+    "https://api.gamjass.xyz",
+    "http://3.36.92.37",
+]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CORS_ALLOW_CREDENTIALS = True  # 쿠키 등 credential 정보 허용
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "cache-control",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 AUTH_USER_MODEL = "users.User"
 
