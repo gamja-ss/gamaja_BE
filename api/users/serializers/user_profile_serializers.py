@@ -32,3 +32,9 @@ class UserStackSerializer(serializers.ModelSerializer):
             selected_stacks.append(user_stack)
 
         return {"selected_stacks": selected_stacks}
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "nickname"]

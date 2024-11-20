@@ -204,7 +204,7 @@ class GetDateProgrammersSolvedView(generics.GenericAPIView):
     serializer_class = ProgrammersDateRequestSerializer
 
     @extend_schema(
-        methods=["GET"],
+        methods=["POST"],
         tags=["programmers"],
         summary="특정 날짜의 프로그래머스 푼 문제 수 조회",
         description="특정 날짜의 프로그래머스 푼 문제 수를 조회합니다",
