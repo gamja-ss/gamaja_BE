@@ -3,12 +3,10 @@ from channels.layers import get_channel_layer
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
+#출석 기록이 생성되면 알림을 생성하고 웹소켓을 통해 클라이언트에 push.
 @receiver(post_save, sender="attendances.Attendance")  # 모델 이름으로 지정
 def handle_attendance_notification(sender, instance, created, **kwargs):
-    """
-    출석 기록이 생성되면 알림을 생성하고 웹소켓을 통해 클라이언트에 push.
-    """
+    
     if created:
         # 지연 임포트를 사용하여 순환 참조 방지
         from attendances.models import Attendance
@@ -19,7 +17,7 @@ def handle_attendance_notification(sender, instance, created, **kwargs):
             user=instance.user,
             type="attendance",
             related_id=instance.id,
-            message=f"{instance.coin_awarded} 코인이 지급되었습니다.",
+            message=f"코인이 지급되었습니다.",
         )
 
         # 웹소켓으로 알림 데이터 푸시

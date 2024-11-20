@@ -1,3 +1,5 @@
+import logging
+
 from coins.models import Coin
 from django.db import transaction
 from django.utils.timezone import now
@@ -8,6 +10,8 @@ from rest_framework.response import Response
 
 from .models import Attendance
 from .serializers import AttendanceSerializer
+
+logger = logging.getLogger("django")
 
 
 class AttendanceView(generics.GenericAPIView):
@@ -24,7 +28,7 @@ class AttendanceView(generics.GenericAPIView):
                 examples=[
                     OpenApiExample(
                         "성공 응답",
-                        value={"message": "출석이 완료되었습니다.", "coin_awarded": 10},
+                        value={"message": "출석이 완료되었습니다."},
                     )
                 ],
             ),
@@ -42,6 +46,7 @@ class AttendanceView(generics.GenericAPIView):
     def post(self, request):
         user = request.user
         today = now().date()
+        logger.info(f"User: {request.user}")
 
         # 출석 중복 확인
         if Attendance.objects.filter(user=user, date=today).exists():
@@ -52,24 +57,26 @@ class AttendanceView(generics.GenericAPIView):
         try:
             with transaction.atomic():
                 # 출석 처리
-                coin_awarded = 10
                 Attendance.objects.create(user=user, date=today)
 
                 # 코인 지급 처리
-                Coin.objects.create(user=user, verb="attendance", coins=coin_awarded)
-
-                # 유저 총 코인 업데이트
-                user.total_coins += coin_awarded
-                user.save()
+                Coin.objects.create(user=user, verb="attendance", coins=10)
 
         except Exception as e:
+            if "duplicate key value" in str(e):
+                logger.warning(f"Duplicate attendance entry detected: {e}")
+                return Response(
+                    {"message": "이미 출석하셨습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            logger.error(f"Error during attendance creation: {e}")
             return Response(
                 {"message": "출석 처리 중 오류가 발생했습니다.", "error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         return Response(
-            {"message": "출석이 완료되었습니다.", "coin_awarded": coin_awarded},
+            {"message": "출석이 완료되었습니다."},
             status=status.HTTP_201_CREATED,
         )
 
@@ -88,14 +95,12 @@ class AttendanceView(generics.GenericAPIView):
                             {
                                 "id": 1,
                                 "user": 1,
-                                "coin_awarded": 10,
                                 "date": "2024-11-16",
                                 "created_at": "2024-11-16T01:00:00Z",
                             },
                             {
                                 "id": 2,
                                 "user": 1,
-                                "coin_awarded": 10,
                                 "date": "2024-11-17",
                                 "created_at": "2024-11-17T01:00:00Z",
                             },

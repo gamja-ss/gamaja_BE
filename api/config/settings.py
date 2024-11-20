@@ -80,6 +80,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost",
     "http://127.0.0.1:5173",
     "https://gamjass.xyz",
+    "https://api.gamjass.xyz",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -337,7 +338,9 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],  # Redis 서버
+            "hosts": [
+                f"redis://:{REDIS_PASSWORD}@redis:6379/0"
+            ],  # Redis URL에 인증 정보 포함
         },
     },
 }
