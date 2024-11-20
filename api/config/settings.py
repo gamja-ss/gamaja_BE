@@ -75,6 +75,12 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1:5173",
+    "https://gamjass.xyz",
+]
+
 AUTH_USER_MODEL = "users.User"
 
 # Application definition
