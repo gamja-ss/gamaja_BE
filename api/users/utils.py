@@ -1,3 +1,5 @@
+import os
+
 import pytz
 from django.conf import settings
 from django.utils import timezone
@@ -52,16 +54,21 @@ class GamjaAuthClass:
         else:
             raise ValueError("key should be 'access' or 'refresh'")
 
+        # .env 값을 읽어와 쿠키 설정
+        samesite = os.getenv("COOKIE_SAMESITE", "Lax")  # 기본값 "Lax"
+        secure = os.getenv("COOKIE_SECURE", "False").lower() == "true"
+        domain = os.getenv("COOKIE_DOMAIN", None)  # 기본값 None
+
         response.set_cookie(
             key=key,
             value=token,
             httponly=True,
-            samesite="Lax",
-            secure=False,
+            samesite=samesite,
+            secure=secure,
             expires=expires_at,
+            domain=domain if domain != "None" else None,
             path="/",
         )
-
         return response
 
     @staticmethod

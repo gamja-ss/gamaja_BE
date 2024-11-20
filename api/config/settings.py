@@ -20,8 +20,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# .env 파일 로드
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# 환경 변수에 따라 다른 .env 파일 로드
+env_file = ".env.dev" if os.getenv("DJANGO_ENV") == "development" else ".env.prod"
+load_dotenv(os.path.join(BASE_DIR, env_file))
 
 
 # Quick-start development settings - unsuitable for production
