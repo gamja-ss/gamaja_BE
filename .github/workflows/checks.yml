@@ -140,8 +140,8 @@ jobs:
             echo "COOKIE_SECURE=${{ secrets.COOKIE_SECURE_PROD }}" >> .env.prod
             echo "COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN_PROD }}" >> .env.prod
             echo "VERSION=${VERSION}" >> .env.prod
-            docker-compose -f docker-compose.prod.yml --env-file .env.prod pull app
-            docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d app
+            docker-compose -f docker-compose.prod.yml --env-file=${ENV_FILE} pull app
+            docker-compose -f docker-compose.prod.yml --env-file=${ENV_FILE} up -d app
             
           EOF
 
@@ -171,8 +171,8 @@ jobs:
             echo "COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN_DEV }}" >> .env.dev
             echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env.dev
             echo "VERSION=${VERSION}" >> .env.dev
-            docker-compose -f docker-compose.prod.yml --env-file .env.dev pull app
-            docker-compose -f docker-compose.prod.yml --env-file .env.dev up -d app
+            docker-compose -f docker-compose.prod.yml --env-file=${ENV_FILE} pull app
+            docker-compose -f docker-compose.prod.yml --env-file=${ENV_FILE} up -d app
           EOF
 
       - name: Clean up
