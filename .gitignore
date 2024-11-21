@@ -1,3 +1,7 @@
+.env
+.env.dev
+.env.prod
+
 ### Database ###
 *.accdb
 *.db
