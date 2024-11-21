@@ -15,7 +15,7 @@ from .models import Follow
 from .serializers import FollowListSerializer
 
 
-class UserSearchAPIView(generics.ListAPIView):
+class UserSearchView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
@@ -45,7 +45,7 @@ class UserSearchAPIView(generics.ListAPIView):
         return queryset
 
 
-class FollowAPIView(generics.GenericAPIView):
+class FollowView(generics.GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -99,7 +99,7 @@ class FollowAPIView(generics.GenericAPIView):
             )
 
 
-class UnfollowAPIView(generics.GenericAPIView):
+class UnfollowView(generics.GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -154,7 +154,64 @@ class UnfollowAPIView(generics.GenericAPIView):
             )
 
 
-class OwnFollowerListAPIView(generics.ListAPIView):
+class RemoveFollowerView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        tags=["follow"],
+        summary="팔로워 삭제",
+        description="자신을 팔로우한 사용자를 팔로워 목록에서 삭제합니다.",
+        parameters=[
+            OpenApiParameter(
+                name="nickname",
+                description="삭제할 팔로워의 닉네임",
+                required=True,
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(description="팔로워 삭제 성공"),
+            400: OpenApiResponse(description="잘못된 요청"),
+            404: OpenApiResponse(description="사용자를 찾을 수 없음"),
+        },
+    )
+    def delete(self, request, nickname):
+        try:
+            follower_to_remove = User.objects.get(nickname=nickname)
+            if request.user == follower_to_remove:
+                return Response(
+                    {"error": "자기 자신을 팔로워 목록에서 삭제할 수 없습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            follow = Follow.objects.filter(
+                follower=follower_to_remove, followed=request.user
+            ).first()
+            if follow:
+                follow.delete()
+                return Response(
+                    {
+                        "message": f"{follower_to_remove.nickname}님을 팔로워 목록에서 삭제했습니다."
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {
+                        "message": f"{follower_to_remove.nickname}님은 당신의 팔로워가 아닙니다."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except User.DoesNotExist:
+            return Response(
+                {"error": "사용자를 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class OwnFollowerListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -184,7 +241,7 @@ class OwnFollowerListAPIView(generics.ListAPIView):
         return User.objects.filter(following__followed=user)
 
 
-class UserFollowerListAPIView(generics.ListAPIView):
+class UserFollowerListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
@@ -223,7 +280,7 @@ class UserFollowerListAPIView(generics.ListAPIView):
         return User.objects.filter(following__followed=user)
 
 
-class OwnFollowingListAPIView(generics.ListAPIView):
+class OwnFollowingListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -253,7 +310,7 @@ class OwnFollowingListAPIView(generics.ListAPIView):
         return User.objects.filter(followers__follower=user)
 
 
-class UserFollowingListAPIView(generics.ListAPIView):
+class UserFollowingListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
