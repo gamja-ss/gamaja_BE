@@ -197,4 +197,4 @@ class ListGuestbookView(generics.ListAPIView):
         return Response(serializer.data)
 
     def get_queryset(self, host):
-        return Guestbook.objects.filter(host=host)
+        return Guestbook.objects.filter(host=host).order_by("-created_at")
