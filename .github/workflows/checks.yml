@@ -120,6 +120,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           VERSION: ${{ env.VERSION }}
           DJANGO_ENV: production
+          ENV_FILE: .env.prod
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.36.92.37 << EOF
@@ -149,6 +150,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           VERSION: ${{ env.VERSION }}
+          ENV_FILE: .env.dev
           DJANGO_ENV: development
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key

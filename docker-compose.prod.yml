@@ -14,8 +14,7 @@ services:
       - DB_PASSWORD=${RDS_PASSWORD}
       - PYTHONPATH=/app/api
     env_file:
-      - .env.dev
-      - .env.prod
+      - ${ENV_FILE}
     networks:
       - app_network
 
@@ -27,8 +26,7 @@ services:
     environment:
       - PYTHONPATH=/app/api
     env_file:
-      - .env.dev
-      - .env.prod
+      - ${ENV_FILE}
     networks:
       - app_network
 
@@ -61,8 +59,7 @@ services:
       - PYTHONPATH=/app/api
       - DJANGO_SETTINGS_MODULE=api.config.settings
     env_file:
-      - .env.dev
-      - .env.prod
+      - ${ENV_FILE}
     depends_on:
       - redis
     networks:
@@ -79,8 +76,7 @@ services:
       - PYTHONPATH=/app/api
       - DJANGO_SETTINGS_MODULE=api.config.settings
     env_file:
-      - .env.dev
-      - .env.prod
+      - ${ENV_FILE}
     depends_on:
       - redis
     networks:
