@@ -31,5 +31,6 @@ urlpatterns = [
     path("attendance/", include("attendances.urls")),
     path("follow/", include("follows.urls")),
     path("guestbook/", include("guestbooks.urls")),
+    path("potato/", include("potatoes.urls")),
     path("coin/", include("coins.urls")),
 ]
