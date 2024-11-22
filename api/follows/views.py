@@ -87,9 +87,7 @@ class FollowView(generics.GenericAPIView):
                 )
             else:
                 return Response(
-                    {
-                        "message": f"이미 {user_to_follow.nickname}님을 팔로우하고 있습니다."
-                    },
+                    {"message": f"이미 {user_to_follow.nickname}님을 팔로우하고 있습니다."},
                     status=status.HTTP_200_OK,
                 )
         except User.DoesNotExist:
@@ -142,9 +140,7 @@ class UnfollowView(generics.GenericAPIView):
                 )
             else:
                 return Response(
-                    {
-                        "message": f"{user_to_unfollow.nickname}님을 팔로우하고 있지 않습니다."
-                    },
+                    {"message": f"{user_to_unfollow.nickname}님을 팔로우하고 있지 않습니다."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except User.DoesNotExist:
@@ -192,16 +188,12 @@ class RemoveFollowerView(generics.GenericAPIView):
             if follow:
                 follow.delete()
                 return Response(
-                    {
-                        "message": f"{follower_to_remove.nickname}님을 팔로워 목록에서 삭제했습니다."
-                    },
+                    {"message": f"{follower_to_remove.nickname}님을 팔로워 목록에서 삭제했습니다."},
                     status=status.HTTP_200_OK,
                 )
             else:
                 return Response(
-                    {
-                        "message": f"{follower_to_remove.nickname}님은 당신의 팔로워가 아닙니다."
-                    },
+                    {"message": f"{follower_to_remove.nickname}님은 당신의 팔로워가 아닙니다."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except User.DoesNotExist:
