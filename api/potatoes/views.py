@@ -164,31 +164,32 @@ class UserPotatoPresetUpdateView(generics.UpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # 프리셋 적용
 
-# 프리셋 적용
+
+@extend_schema(
+    tags=["potato"],
+    summary="프리셋 적용",
+    description="사용자가 저장한 프리셋을 감자에 적용합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="preset_id",
+            description="적용할 프리셋 ID",
+            required=True,
+            type=int,
+            location=OpenApiParameter.PATH,
+        ),
+    ],
+    request=UserPotatoPresetApplySerializer,
+    responses={
+        200: OpenApiResponse(description="프리셋이 성공적으로 적용되었습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        404: OpenApiResponse(description="프리셋 또는 감자를 찾을 수 없습니다."),
+    },
+)
 class UserPotatoPresetApplyView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        tags=["potato"],
-        summary="프리셋 적용",
-        description="사용자가 저장한 프리셋을 감자에 적용합니다.",
-        parameters=[
-            OpenApiParameter(
-                name="preset_id",
-                description="적용할 프리셋 ID",
-                required=True,
-                type=int,
-                location=OpenApiParameter.PATH,
-            ),
-        ],
-        request=UserPotatoPresetApplySerializer,
-        responses={
-            200: OpenApiResponse(description="프리셋이 성공적으로 적용되었습니다."),
-            403: OpenApiResponse(description="권한이 없습니다."),
-            404: OpenApiResponse(description="프리셋 또는 감자를 찾을 수 없습니다."),
-        },
-    )
     def put(self, request, *args, **kwargs):
         serializer = UserPotatoPresetApplySerializer(
             data=request.data, context={"request": request}
