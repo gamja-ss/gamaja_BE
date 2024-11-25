@@ -33,6 +33,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
         return None
 
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_is_purchased(self, obj):
         # 요청 사용자를 가져옴
         request = self.context.get("request")

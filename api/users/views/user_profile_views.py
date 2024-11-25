@@ -19,7 +19,7 @@ class UserStack_SelectionView(generics.CreateAPIView):
 
     @extend_schema(
         methods=["POST"],
-        tags=["account"],
+        tags=["info"],
         summary="사용자가 선택한 기술 스택 저장",
         description="사용자가 선택한 기술 스택을 저장하는 엔드포인트입니다.",
         request=UserStackSerializer,
@@ -69,14 +69,13 @@ class UserStack_SelectionView(generics.CreateAPIView):
 
 
 # 사용자 닉네임 수정 뷰
-class ChangeNicknameView(generics.UpdateAPIView):
+class ChangeNicknameView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
-    http_method_names = ["patch"]
     serializer_class = NicknameSerializer
 
     @extend_schema(
         methods=["PATCH"],
-        tags=["account"],
+        tags=["info"],
         summary="닉네임 변경",
         description="사용자가 자신의 닉네임을 변경하는 엔드포인트입니다.",
         responses={
@@ -129,7 +128,7 @@ class ChangeNicknameView(generics.UpdateAPIView):
             ),
         ],
     )
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         new_nickname = request.data.get("nickname")
 
         # 닉네임 유효성 검사

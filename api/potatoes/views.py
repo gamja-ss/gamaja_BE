@@ -154,9 +154,13 @@ class UserPotatoPresetUpdateView(generics.GenericAPIView):
         new_item_ids = request.data.get("item_ids", None)
 
         if new_item_ids is not None:
-            existing_item_ids = instance.item_ids or []
-            merged_item_ids = list(set(existing_item_ids + new_item_ids))
-            request.data["item_ids"] = merged_item_ids
+            if not new_item_ids:
+                # 빈 배열이 전달되면 아이템 모두 삭제
+                request.data["item_ids"] = []
+            else:
+                existing_item_ids = instance.item_ids or []
+                merged_item_ids = list(set(existing_item_ids + new_item_ids))
+                request.data["item_ids"] = merged_item_ids
 
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -164,9 +168,8 @@ class UserPotatoPresetUpdateView(generics.GenericAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # 프리셋 적용
 
-
+# 프리셋 적용
 @extend_schema(
     tags=["potato"],
     summary="프리셋 적용",
