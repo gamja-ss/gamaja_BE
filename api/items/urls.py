@@ -1,6 +1,10 @@
 from django.urls import path
 
-from .views.admin_item_views import AdminItemDetailView, AdminItemListView
+from .views.admin_item_views import (
+    AdminItemDetailView,
+    AdminItemImageUploadView,
+    AdminItemListView,
+)
 from .views.user_item_views import (
     ItemDetailView,
     ItemListView,
@@ -10,6 +14,11 @@ from .views.user_item_views import (
 
 urlpatterns = [
     path("admin/", AdminItemListView.as_view(), name="admin_item_list"),
+    path(
+        "admin/<int:item_id>/image/",
+        AdminItemImageUploadView.as_view(),
+        name="item_admin_image_upload",
+    ),
     path(
         "admin/<int:item_id>/", AdminItemDetailView.as_view(), name="admin_item_detail"
     ),

@@ -61,3 +61,15 @@ class ItemPurchaseSerializer(serializers.Serializer):
         if not Item.objects.filter(id=value).exists():
             raise serializers.ValidationError("유효하지 않은 아이템 ID입니다.")
         return value
+
+
+# 아이템 이미지 업로드
+class ItemImageUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ["id", "image"]
+
+    def update(self, instance, validated_data):
+        instance.image = validated_data.get("image", instance.image)
+        instance.save()
+        return instance

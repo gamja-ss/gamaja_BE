@@ -138,7 +138,7 @@ class UserPotatoPresetCreateView(generics.CreateAPIView):
         404: OpenApiResponse(description="프리셋을 찾을 수 없습니다."),
     },
 )
-class UserPotatoPresetUpdateView(generics.UpdateAPIView):
+class UserPotatoPresetUpdateView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserPotatoPresetUpdateSerializer
     lookup_field = "id"
@@ -148,7 +148,7 @@ class UserPotatoPresetUpdateView(generics.UpdateAPIView):
         user = self.request.user
         return UserPreset.objects.filter(user=user)
 
-    def partial_update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         instance = self.get_object()
 
         new_item_ids = request.data.get("item_ids", None)
