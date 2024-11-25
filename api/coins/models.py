@@ -7,6 +7,7 @@ COIN_TYPES = (
     ("baekjoon", "백준 문제 풀이"),
     ("programmers", "프로그래머스 문제 풀이"),
     ("challenge", "챌린지 성공"),
+    ("purchase", "아이템 구매"),
 )
 
 

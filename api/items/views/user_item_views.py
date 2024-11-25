@@ -1,3 +1,5 @@
+from coins.models import Coin
+from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, status
@@ -76,20 +78,30 @@ class ItemPurchaseView(generics.CreateAPIView):
             return Response(
                 {"detail": "아이템을 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND
             )
+        try:
+            # 트랜잭션 내에서 구매 처리
+            with transaction.atomic():
+                # 코인 잔액 확인
+                if user.total_coins < item.price:
+                    return Response(
+                        {"detail": "코인이 부족합니다."}, status=status.HTTP_400_BAD_REQUEST
+                    )
 
-        # 사용자의 코인 체크
-        if user.coin_balance < item.price:
+                # 코인 차감
+                Coin.objects.create(user=user, verb="purchase", coins=-item.price)
+
+                # 아이템 구매 처리
+                UserItem.objects.create(user=user, item=item)
+
+        except Exception as e:
             return Response(
-                {"detail": "코인이 부족합니다."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": f"구매 처리 중 오류가 발생했습니다: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        # 아이템 구매 처리
-        UserItem.objects.create(user=user, item=item)
-        user.coin_balance -= item.price
-        user.save()
-
+        # 잔액 반환
         return Response(
-            {"message": "아이템 구매 성공", "remaining_balance": user.coin_balance},
+            {"message": "아이템 구매 성공", "user_total_coins": user.total_coins},
             status=status.HTTP_200_OK,
         )
 
