@@ -32,23 +32,10 @@ SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "0.0.0.0",
-    "localhost",
-    "127.0.0.1",
-    "13.125.223.30",
-    ".gamjass.xyz",
-    "api.gamjass.xyz",
-]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost",
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-    "https://gamjass.xyz",
-    "https://api.gamjass.xyz",
-    "http://13.125.223.30",
-]
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -74,12 +61,7 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost",
-    "http://127.0.0.1:5173",
-    "https://gamjass.xyz",
-    "https://api.gamjass.xyz",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 AUTH_USER_MODEL = "users.User"
 
