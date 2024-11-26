@@ -36,7 +36,7 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "localhost",
     "127.0.0.1",
-    "3.36.92.37",
+    "13.125.223.30",
     ".gamjass.xyz",
     "api.gamjass.xyz",
 ]
@@ -47,7 +47,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://gamjass.xyz",
     "https://api.gamjass.xyz",
-    "http://3.36.92.37",
+    "http://13.125.223.30",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
