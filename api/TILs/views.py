@@ -8,7 +8,7 @@ from .serializers import TILSerializer
 
 
 @extend_schema(
-    tags=["til"],
+    tags=["TIL"],
     summary="TIL 작성",
     description="새로운 TIL을 작성합니다.",
     responses={
@@ -25,7 +25,7 @@ class CreateTILAPI(generics.CreateAPIView):
 
 
 @extend_schema(
-    tags=["til"],
+    tags=["TIL"],
     summary="TIL 수정",
     description="기존 TIL을 수정합니다.",
     responses={
@@ -51,7 +51,7 @@ class UpdateTILAPI(generics.UpdateAPIView):
 
 
 @extend_schema(
-    tags=["til"],
+    tags=["TIL"],
     summary="TIL 삭제",
     description="TIL을 삭제합니다.",
     responses={
