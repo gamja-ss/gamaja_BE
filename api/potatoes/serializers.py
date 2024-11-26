@@ -1,3 +1,5 @@
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from items.models import Item
 from rest_framework import serializers
 
@@ -5,7 +7,7 @@ from .models import Potato, UserPreset
 
 
 # 아이템 직렬화
-class ItemSerializer(serializers.ModelSerializer):
+class PotatoItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ["id", "name", "description", "price", "item_type"]
@@ -13,7 +15,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
 # 감자 조회 및 수정
 class UserPotatoSerializer(serializers.ModelSerializer):
-    skin_item = ItemSerializer(read_only=True)  # 스킨 아이템의 상세 정보는 아이템시리얼라이저에서참조
+    skin_item = PotatoItemSerializer(read_only=True)  # 스킨 아이템의 상세 정보는 아이템시리얼라이저에서참조
 
     class Meta:
         model = Potato
@@ -43,9 +45,10 @@ class UserPotatoPresetDetailSerializer(serializers.ModelSerializer):
         model = UserPreset
         fields = ["id", "preset_name", "item_details", "created_at"]
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_item_details(self, obj):
         items = Item.objects.filter(id__in=obj.item_ids)
-        return ItemSerializer(items, many=True).data
+        return PotatoItemSerializer(items, many=True).data
 
 
 # 프리셋 생성

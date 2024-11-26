@@ -21,6 +21,8 @@ celery = "^5.4.0"
 redis = "^5.2.0"
 channels = "^4.0"
 channels_redis = "^4.1.0"
+boto3 = "*"
+pillow = "^10.4.0"
 
 
 [build-system]

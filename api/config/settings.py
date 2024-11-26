@@ -36,7 +36,7 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "localhost",
     "127.0.0.1",
-    "3.36.92.37",
+    "13.125.223.30",
     ".gamjass.xyz",
     "api.gamjass.xyz",
 ]
@@ -47,7 +47,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://gamjass.xyz",
     "https://api.gamjass.xyz",
-    "http://3.36.92.37",
+    "http://13.125.223.30",
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -260,17 +260,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-STATIC_ROOT = "/app/static/"
-
-# Media files(json)
-MEDIA_URL = "/media/"
-MEDIA_ROOT = "/app/media/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -336,9 +325,24 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [
-                f"redis://:{REDIS_PASSWORD}@redis:6379/0"
-            ],  # Redis URL에 인증 정보 포함
+            "hosts": [f"redis://:{REDIS_PASSWORD}@redis:6379/0"],  # Redis URL에 인증 정보 포함
         },
     },
 }
+
+# s3 setting
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+AWS_QUERYSTRING_AUTH = False
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+STATIC_URL = (
+    f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/static/"
+)
+MEDIA_URL = (
+    f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/media/"
+)

@@ -22,7 +22,7 @@ urlpatterns = [
     ),
     # apps
     path("auth/", include("users.urls.auth_urls")),
-    path("account/", include("users.urls.profile_urls")),
+    path("info/", include("users.urls.profile_urls")),
     path("info/", include("users.urls.info_urls")),
     path("github/", include("githubs.urls")),
     path("baekjoon/", include("baekjoons.urls")),
@@ -33,4 +33,5 @@ urlpatterns = [
     path("guestbook/", include("guestbooks.urls")),
     path("potato/", include("potatoes.urls")),
     path("coin/", include("coins.urls")),
+    path("item/", include("items.urls")),
 ]
