@@ -33,5 +33,6 @@ urlpatterns = [
     path("guestbook/", include("guestbooks.urls")),
     path("potato/", include("potatoes.urls")),
     path("coin/", include("coins.urls")),
+    path("til/", include("TILs.urls")),
     path("item/", include("items.urls")),
 ]

@@ -93,7 +93,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "channels",
     "common.apps.CommonConfig",
-    "articles.apps.ArticlesConfig",
+    "TILs.apps.TilsConfig",
     "attendances.apps.AttendancesConfig",
     "baekjoons.apps.BaekjoonsConfig",
     "challenges.apps.ChallengesConfig",
