@@ -6,11 +6,7 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 from rest_framework import generics, status
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import User
 from users.serializers.user_profile_serializers import UserSerializer
@@ -42,7 +38,7 @@ class UserSearchView(generics.ListAPIView):
         queryset = User.objects.all()
         nickname = self.request.query_params.get("nickname")
         if nickname:
-            queryset = queryset.filter(Q(nickname__icontains=nickname))
+            queryset = queryset.filter(nickname__icontains=nickname)
         return queryset
 
 
