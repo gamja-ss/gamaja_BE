@@ -40,7 +40,7 @@ class UserTotalCoinsView(APIView):
         return Response({"total_coins": request.user.total_coins})
 
 
-class CustomPagination(PageNumberPagination):
+class CoinPagination(PageNumberPagination):
     page_size = 20
     page_size_query_param = None
     max_page_size = 20
@@ -64,7 +64,7 @@ class CustomPagination(PageNumberPagination):
 class UserCoinLogView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CoinSerializer
-    pagination_class = CustomPagination
+    pagination_class = CoinPagination
 
     def get_queryset(self):
         return Coin.objects.filter(user=self.request.user).order_by("-timestamp")

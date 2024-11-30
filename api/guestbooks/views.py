@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import User
@@ -102,6 +103,12 @@ class DeleteGuestbookView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class GuestbookPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = None
+    max_page_size = 10
+
+
 @extend_schema(
     tags=["guestbook"],
     summary="방명록 리스트 조회",
@@ -120,6 +127,7 @@ class DeleteGuestbookView(generics.DestroyAPIView):
 class ListGuestbookView(generics.ListAPIView):
     serializer_class = GuestbookSerializer
     permission_classes = [AllowAny]
+    pagination_class = GuestbookPagination
 
     def get_queryset(self):
         nickname = self.kwargs.get("nickname")

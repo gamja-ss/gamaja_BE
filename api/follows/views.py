@@ -6,6 +6,7 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 from rest_framework import generics, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import User
@@ -188,7 +189,15 @@ class RemoveFollowerView(generics.DestroyAPIView):
             )
 
 
+class FollowPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = None
+    max_page_size = 20
+
+
 class FollowListMixin:
+    serializer_class = UserSerializer
+    pagination_class = FollowPagination
 
     def get_response_data(self, user, queryset):
         serializer = self.get_serializer(queryset, many=True)
@@ -205,7 +214,6 @@ class FollowListMixin:
 
 
 class OwnFollowersListView(FollowListMixin, generics.ListAPIView):
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -222,7 +230,6 @@ class OwnFollowersListView(FollowListMixin, generics.ListAPIView):
 
 
 class UserFollowersListView(FollowListMixin, generics.ListAPIView):
-    serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(
@@ -248,7 +255,6 @@ class UserFollowersListView(FollowListMixin, generics.ListAPIView):
 
 
 class OwnFollowingListView(FollowListMixin, generics.ListAPIView):
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -265,7 +271,6 @@ class OwnFollowingListView(FollowListMixin, generics.ListAPIView):
 
 
 class UserFollowingListView(FollowListMixin, generics.ListAPIView):
-    serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
     @extend_schema(
