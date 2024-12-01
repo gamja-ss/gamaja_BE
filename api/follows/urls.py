@@ -12,15 +12,15 @@ urlpatterns = [
         name="remove-follower",
     ),
     path(
-        "follower/<str:nickname>/",
-        views.UserFollowerListView.as_view(),
-        name="follower-list",
+        "followers/<str:nickname>/",
+        views.UserFollowersListView.as_view(),
+        name="user-followers-list",
     ),
     path(
         "following/<str:nickname>/",
         views.UserFollowingListView.as_view(),
-        name="following-list",
+        name="user-following-list",
     ),
-    path("follower/", views.OwnFollowerListView.as_view(), name="own-follower-list"),
+    path("followers/", views.OwnFollowersListView.as_view(), name="own-followers-list"),
     path("following/", views.OwnFollowingListView.as_view(), name="own-following-list"),
 ]
