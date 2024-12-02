@@ -97,10 +97,12 @@ def update_user_programmers_info(user):
 
     if score_difference > 0:
         coins_earned = score_difference
+        exp_earned = score_difference
 
         Coin.objects.create(
             user=user, verb="programmers", coins=coins_earned, timestamp=now
         )
+        user.increase_exp(exp_earned)
 
         print(f"코인 증가: 사용자 {user.username}, 획득 코인: {coins_earned}")
 

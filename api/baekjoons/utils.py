@@ -63,6 +63,7 @@ def update_user_baekjoon_info(user):
         score_difference = now_score - previous_baekjoon.score
         if score_difference > 0:
             coins_earned = score_difference
+            exp_earned = score_difference
 
             Coin.objects.create(
                 user=user,
@@ -70,6 +71,8 @@ def update_user_baekjoon_info(user):
                 coins=coins_earned,
                 timestamp=now,
             )
+
+            user.increase_exp(exp_earned)
 
     baekjoon, created = Baekjoon.objects.update_or_create(
         user=user,
