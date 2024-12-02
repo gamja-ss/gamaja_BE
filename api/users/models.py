@@ -1,6 +1,9 @@
 from common.models import TimeStampModel
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
-                                        PermissionsMixin)
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -80,9 +83,14 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampModel):
     programmers_initial_date = models.DateField(null=True, blank=True)
 
     # 감자 관련 필드
-    user_level = models.PositiveIntegerField(null=False, default=1)
+    user_tier = models.CharField(max_length=25, null=False, default="Bronze5")
     user_exp = models.PositiveIntegerField(null=False, default=0)
     total_coins = models.PositiveIntegerField(default=0)
+
+    def increase_exp(self, amount):
+        self.user_exp += amount
+        self.user_tier = calculate_user_tier(self.user_exp)
+        self.save()
 
     def update_total_coins(self):
         self.total_coins = self.coins.aggregate(total=models.Sum("coins"))["total"] or 0
