@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from .encrypt_utils import decrypt, encrypt
+from .user_tier_utils import calculate_user_tier
 
 
 class EncryptedCharField(models.CharField):
