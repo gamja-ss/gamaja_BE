@@ -75,7 +75,7 @@ def set_initial_programmers_info(user):
 
 @transaction.atomic
 def update_user_programmers_info(user):
-    if not user.programmers_id and user.programmers_password:
+    if not user.programmers_id and not user.programmers_password:
         print(f"Programmers 정보 없음: 사용자 {user.id}")
         return None
 
