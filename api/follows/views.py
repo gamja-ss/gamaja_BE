@@ -10,10 +10,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from users.models import User
-from users.serializers.user_profile_serializers import UserSerializer
 
 from .models import Follow
-from .serializers import FollowListSerializer
+from .serializers import FollowListSerializer, UserSerializer
 
 
 @extend_schema(
@@ -41,6 +40,11 @@ class UserSearchView(generics.ListAPIView):
         if nickname:
             queryset = queryset.filter(nickname__icontains=nickname)
         return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
 
 class FollowUnfollowMixin:
