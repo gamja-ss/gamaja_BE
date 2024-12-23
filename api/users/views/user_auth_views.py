@@ -147,6 +147,7 @@ class GithubLoginCallback(generics.GenericAPIView):
                 github_id=user_data.get("login"),
                 nickname=user_data.get("login"),
                 email=email,
+                github_access_token=access_token,
             )
             created = True
 
