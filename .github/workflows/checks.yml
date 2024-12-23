@@ -111,8 +111,8 @@ jobs:
 
       - name: Copy docker-compose.prod.yml to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@13.125.223.30:/home/ubuntu/app/docker-compose.prod.yml
-          scp -o StrictHostKeyChecking=no -i private_key docker-compose.dev.yml ubuntu@13.125.223.30:/home/ubuntu/app/docker-compose.prod.yml
+          scp -o StrictHostKeyChecking=no -i private_key docker-compose.prod.yml ubuntu@3.35.14.70:/home/ubuntu/app/docker-compose.prod.yml
+          scp -o StrictHostKeyChecking=no -i private_key docker-compose.dev.yml ubuntu@3.35.14.70:/home/ubuntu/app/docker-compose.prod.yml
 
       - name: Deploy to EC2 (main branch and tags for prod)
         if: github.ref_name == 'main' && startsWith(github.ref, 'refs/tags/v')
@@ -121,7 +121,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@13.125.223.30 << EOF
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.35.14.70 << EOF
             cd /home/ubuntu/app
             sed -i "s/^VERSION=.*/VERSION=${VERSION}/" .env.prod
             docker-compose -f docker-compose.prod.yml --env-file .env.prod pull app
@@ -136,7 +136,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@13.125.223.30 << EOF
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.35.14.70 << EOF
             cd /home/ubuntu/app
             sed -i "s/^VERSION=.*/VERSION=${VERSION}/" .env.dev
             docker-compose -f docker-compose.dev.yml --env-file .env.dev pull app
