@@ -115,26 +115,18 @@ class GithubLoginCallback(generics.GenericAPIView):
         token_request_data = self.ghc.create_token_request_data(
             code=request.data.get("code", None)
         )
-        print(f"Token Request Data: {token_request_data}")
-
         try:
             access_token = self.ghc.get_access_token(
                 token_request_data=token_request_data
             )
-            print(f"Access Token: {access_token}")
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         auth_headers = {"Authorization": f"Bearer {access_token}"}
-        print(f"Auth Headers: {auth_headers}")
         try:
             user_data = self.ghc.get_user_info(auth_headers=auth_headers)
-            print(f"User Data: {user_data}")
         except Exception as e:
-            print(f"Error getting user info: {str(e)}")
-            return Response(
-                {"error": "Failed to get user info"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # 사용자 생성/업데이트 및 로그인
         username = user_data.get("login")
