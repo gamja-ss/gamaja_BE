@@ -115,7 +115,6 @@ class GithubLoginCallback(generics.GenericAPIView):
         token_request_data = self.ghc.create_token_request_data(
             code=request.data.get("code", None)
         )
-
         try:
             access_token = self.ghc.get_access_token(
                 token_request_data=token_request_data
@@ -124,7 +123,10 @@ class GithubLoginCallback(generics.GenericAPIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         auth_headers = {"Authorization": f"Bearer {access_token}"}
-        user_data = self.ghc.get_user_info(auth_headers=auth_headers)
+        try:
+            user_data = self.ghc.get_user_info(auth_headers=auth_headers)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # 사용자 생성/업데이트 및 로그인
         username = user_data.get("login")
@@ -339,7 +341,9 @@ class UserDeleteView(generics.GenericAPIView):
         description="사용자 계정을 삭제하고 관련 토큰을 블랙리스트에 추가합니다.",
         responses={
             204: OpenApiResponse(description="회원탈퇴 성공"),
-            400: OpenApiResponse(description="리프레시 토큰이 쿠키에 없거나 유효하지 않음"),
+            400: OpenApiResponse(
+                description="리프레시 토큰이 쿠키에 없거나 유효하지 않음"
+            ),
             500: OpenApiResponse(description="서버 내부 오류"),
         },
     )
