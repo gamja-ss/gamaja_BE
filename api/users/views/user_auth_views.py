@@ -86,6 +86,8 @@ class GithubLoginCallback(generics.GenericAPIView):
                 value={
                     "message": "Login successful",
                     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user_id": 3,
+                    "user_nickname": "gamja",
                 },
                 response_only=True,
                 status_codes=["200"],
@@ -97,6 +99,9 @@ class GithubLoginCallback(generics.GenericAPIView):
                 value={
                     "message": "Login successful",
                     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "user_id": 3,
+                    "user_username": "gamja",
+                    "user_nickname": "gamja",
                 },
                 response_only=True,
                 status_codes=["201"],
@@ -163,6 +168,9 @@ class GithubLoginCallback(generics.GenericAPIView):
         response_data = {
             "message": "Login successful",
             "access_token": jwt_tokens["access"],
+            "user_id": user.id,
+            "user_username": user.username,
+            "user_nickname": user.nickname,
         }
         response = Response(data=response_data)
 
