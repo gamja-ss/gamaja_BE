@@ -66,7 +66,7 @@ class GamjaAuthClass:
             samesite=samesite,
             secure=secure,
             expires=expires_at,
-            domain=domain if domain != "None" else None,
+            # domain=domain if domain != "None" else None,
             path="/",
         )
         return response
