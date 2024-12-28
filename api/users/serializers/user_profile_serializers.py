@@ -32,3 +32,33 @@ class UserStackSerializer(serializers.ModelSerializer):
             selected_stacks.append(user_stack)
 
         return {"selected_stacks": selected_stacks}
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="id", read_only=True)
+    profile_image = serializers.CharField(source="profile_url")
+    nickname = serializers.CharField(required=False)
+    username = serializers.CharField(read_only=True)
+    email = serializers.CharField(required=False)
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
+    bio = serializers.CharField(required=False)
+    user_tier = serializers.CharField()
+    user_exp = serializers.IntegerField(read_only=True)
+    total_coins = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "user_id",
+            "username",
+            "nickname",
+            "profile_image",
+            "email",
+            "bio",
+            "followers_count",
+            "following_count",
+            "user_tier",
+            "user_exp",
+            "total_coins",
+        ]

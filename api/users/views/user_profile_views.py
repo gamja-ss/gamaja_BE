@@ -1,13 +1,15 @@
 import re
 
-from drf_spectacular.utils import OpenApiExample, extend_schema
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from stacks.models import Stack, UserStack
 from users.models import User
 from users.serializers.user_profile_serializers import (
     NicknameSerializer,
+    UserProfileSerializer,
     UserStackSerializer,
 )
 
@@ -155,3 +157,41 @@ class ChangeNicknameView(generics.GenericAPIView):
         request.user.save()
 
         return Response({"nickname": new_nickname}, status=status.HTTP_200_OK)
+
+
+# 본인 프로필 조회 뷰
+@extend_schema(
+    tags=["info"],
+    summary="사용자 프로필 조회",
+    description="로그인한 사용자의 프로필 정보를 조회합니다.",
+    responses={status.HTTP_200_OK: UserProfileSerializer},
+)
+class MyProfileDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get(self, request):
+        user = request.user
+
+        profile = User.objects.get(id=user.id)
+
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# 사용자 프로필 조회 뷰
+@extend_schema(
+    tags=["info"],
+    summary="사용자 프로필 조회",
+    description="다른 사용자의 프로필 정보를 조회합니다.",
+    responses={status.HTTP_200_OK: UserProfileSerializer},
+)
+class UserProfileDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get(self, request, nickname):
+        profile = get_object_or_404(User, nickname=nickname)
+
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
