@@ -203,7 +203,7 @@ class UserTokenVerifyView(generics.GenericAPIView):
     )
     def post(self, request, *args, **kwargs):
         logger.info("POST /api/auth/token/verify")
-        token = request.COOKIES.get("access")
+        token = request.COOKIES.get("gamja_access")
         if not token:
             logger.error("/api/auth/token/verify: Access token not found in cookies")
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -249,7 +249,7 @@ class UserTokenRefreshView(generics.GenericAPIView):
     )
     def post(self, request, *args, **kwargs):
         logger.info("POST /api/auth/token/refresh")
-        refresh_token = request.COOKIES.get("refresh")
+        refresh_token = request.COOKIES.get("gamja_refresh")
 
         if not refresh_token:
             logger.error("/api/auth/token/refresh: Refresh token not found in cookies")
@@ -277,7 +277,7 @@ class UserTokenRefreshView(generics.GenericAPIView):
         )
         try:
             GamjaAuthClass.set_cookie_attributes(
-                response=response, key="access", token=access_token
+                response=response, key="gamja_access", token=access_token
             )
         except ValueError:
             logger.error("/api/auth/token/refresh: Failed to set access token cookie")
@@ -308,7 +308,7 @@ class UserLogoutView(generics.GenericAPIView):
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(
-            data={"refresh_token": request.COOKIES.get("refresh")}
+            data={"refresh_token": request.COOKIES.get("gamja_refresh")}
         )
         serializer.is_valid(raise_exception=True)
 
@@ -318,10 +318,10 @@ class UserLogoutView(generics.GenericAPIView):
                 refresh_token.blacklist()
             response = Response(status=status.HTTP_200_OK)
             response.delete_cookie(
-                "access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+                "gamja_access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
             )
             response.delete_cookie(
-                "refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+                "gamja_refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
             )
             logger.info("/api/auth/logout: Logout successful")
             return response
@@ -360,7 +360,7 @@ class UserDeleteView(generics.GenericAPIView):
         logger.info(f"DELETE /api/auth/delete for user: {request.user.username}")
 
         # refresh_token을 쿠키에서 가져옴
-        refresh_token = request.COOKIES.get("refresh")
+        refresh_token = request.COOKIES.get("gamja_refresh")
         if not refresh_token:
             logger.error("Refresh token not found in cookies")
             return Response(
@@ -379,10 +379,10 @@ class UserDeleteView(generics.GenericAPIView):
             # 쿠키에서 JWT 삭제
             response = Response(status=status.HTTP_204_NO_CONTENT)
             response.delete_cookie(
-                "access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+                "gamja_access", domain=os.getenv("COOKIE_DOMAIN"), path="/"
             )
             response.delete_cookie(
-                "refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
+                "gamja_refresh", domain=os.getenv("COOKIE_DOMAIN"), path="/"
             )
 
             logger.info(f"User {user.username} deleted successfully")
