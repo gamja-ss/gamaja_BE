@@ -66,7 +66,7 @@ class GamjaAuthClass:
             samesite="None",
             secure=True,
             expires=expires_at,
-            domain="api.gamjass.xyz",
+            domain=".gamjass.xyz",
             path="/",
         )
         return response
