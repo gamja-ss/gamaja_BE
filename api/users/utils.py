@@ -29,12 +29,12 @@ class GamjaAuthClass:
         """
         response = self.set_cookie_attributes(
             response=response,
-            key="access",
+            key="gamja_access",
             token=jwt_tokens["access"],
         )
         response = self.set_cookie_attributes(
             response=response,
-            key="refresh",
+            key="gamja_refresh",
             token=jwt_tokens["refresh"],
         )
 
@@ -44,15 +44,15 @@ class GamjaAuthClass:
     def set_cookie_attributes(response, key, token):
         """
         Cookie 속성 설정 함수
-        key: access or refresh
+        key: gamja_access or gamja_refresh
         token: jwt token
         """
-        if key == "access":
+        if key == "gamja_access":
             expires_at = GamjaAuthClass()._access_expiration
-        elif key == "refresh":
+        elif key == "gamja_refresh":
             expires_at = GamjaAuthClass()._refresh_expiration
         else:
-            raise ValueError("key should be 'access' or 'refresh'")
+            raise ValueError("key should be 'gamja_access' or 'gamja_refresh'")
 
         # .env 값을 읽어와 쿠키 설정
         samesite = os.getenv("COOKIE_SAMESITE", "Lax")  # 기본값 "Lax"
@@ -63,8 +63,8 @@ class GamjaAuthClass:
             key=key,
             value=token,
             httponly=True,
-            samesite=samesite,
-            secure=secure,
+            samesite="Lax",
+            secure=False,
             expires=expires_at,
             # domain=domain if domain != "None" else None,
             path="/",
