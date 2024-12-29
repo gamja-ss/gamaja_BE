@@ -64,9 +64,9 @@ class GamjaAuthClass:
             value=token,
             httponly=True,
             samesite="None",
-            secure=False,
+            secure=True,
             expires=expires_at,
-            domain=".gamjass.xyz",
+            domain=None,
             path="/",
         )
         return response
