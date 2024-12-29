@@ -63,7 +63,7 @@ class GamjaAuthClass:
             key=key,
             value=token,
             httponly=True,
-            samesite="Lax",
+            samesite="None",
             secure=False,
             expires=expires_at,
             # domain=domain if domain != "None" else None,
