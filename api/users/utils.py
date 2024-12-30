@@ -62,11 +62,10 @@ class GamjaAuthClass:
         response.set_cookie(
             key=key,
             value=token,
-            httponly=False,
-            samesite="None",
-            secure=True,
+            httponly=True,
+            samesite="Lax",
+            secure=False,
             expires=expires_at,
-            domain=None,
             path="/",
         )
         return response
