@@ -1,9 +1,13 @@
+import uuid
+
+import boto3
+from django.conf import settings
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import TIL
+from .models import TIL, TILImage
 from .serializers import TILSerializer
 
 
@@ -23,7 +27,7 @@ class UploadTempImageAPI(generics.CreateAPIView):
 
         try:
             s3_client.upload_fileobj(image, settings.AWS_STORAGE_BUCKET_NAME, file_name)
-            image_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{file_name}"
+            image_url = f"{settings.MEDIA_URL}{file_name}"
 
             temp_image = TILImage.objects.create(image=image_url, is_temporary=True)
 
@@ -83,6 +87,21 @@ class CreateTILAPI(generics.CreateAPIView):
                 image = TILImage.objects.get(id=image_id, is_temporary=True)
                 image.til = til
                 image.is_temporary = False
+                new_path = f'til/{til.id}/{image.image.split("/")[-1]}'
+                s3_client = boto3.client("s3")
+                s3_client.copy_object(
+                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                    CopySource={
+                        "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                        "Key": image.image.split("/", 3)[-1],
+                    },
+                    Key=new_path,
+                )
+                s3_client.delete_object(
+                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                    Key=image.image.split("/", 3)[-1],
+                )
+                image.image = f"https://{settings.MEDIA_URL}/{new_path}"
                 image.save()
             except TILImage.DoesNotExist:
                 pass
@@ -150,7 +169,7 @@ class UpdateTILAPI(generics.UpdateAPIView):
                     image.is_temporary = False
                     new_path = f'til/{til.id}/{image.image.split("/")[-1]}'
                     self.move_image_in_s3(image.image, new_path)
-                    image.image = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{new_path}"
+                    image.image = f"https://{settings.MEDIA_URL}/{new_path}"
                 elif image.til != til:
                     # 다른 TIL에서 가져온 이미지
                     image.til = til
