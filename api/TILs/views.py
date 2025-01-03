@@ -15,44 +15,87 @@ class UploadTempImageAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        image = request.FILES.get("image")
-        if not image:
+        images = request.FILES.get("image")
+        print(f"Image in request.FILES: {images}")
+        if not images:
             return Response(
                 {"error": "이미지가 제공되지 않았습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         s3_client = boto3.client("s3")
-        file_name = f"temp/{uuid.uuid4()}/{image.name}"
+        uploaded_images = []
 
-        try:
-            s3_client.upload_fileobj(image, settings.AWS_STORAGE_BUCKET_NAME, file_name)
-            image_url = f"{settings.MEDIA_URL}{file_name}"
+        for image in images:
+            file_name = f"temp/{uuid.uuid4()}/{image.name}"
 
-            temp_image = TILImage.objects.create(image=image_url, is_temporary=True)
+            try:
+                s3_client.upload_fileobj(
+                    image, settings.AWS_STORAGE_BUCKET_NAME, file_name
+                )
+                image_url = f"{settings.MEDIA_URL}{file_name}"
 
-            return Response(
-                {"image_id": temp_image.id, "image_url": image_url},
-                status=status.HTTP_201_CREATED,
-            )
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                temp_image = TILImage.objects.create(TIL=None, image=image_url)
+                uploaded_images.append(
+                    {"image_id": temp_image.id, "image_url": image_url}
+                )
+
+            except Exception as e:
+                return Response(
+                    {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        return Response(uploaded_images, status=status.HTTP_201_CREATED)
 
 
-class DeleteTempImageAPI(generics.DestroyAPIView):
+class DeleteTempImagesAPI(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
-    queryset = TILImage.objects.filter(is_temporary=True)
+    queryset = TILImage.objects.all()
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        s3_client = boto3.client("s3")
-        s3_client.delete_object(
-            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-            Key=instance.image.split("/", 3)[-1],
+    def delete(self, request, *args, **kwargs):
+        image_ids = request.data.get("image_ids", [])
+
+        if not image_ids:
+            return Response(
+                {"error": "삭제할 이미지 ID가 제공되지 않았습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = self.get_queryset().filter(
+            Q(id__in=image_ids) & Q(TIL__isnull=True) & Q(is_temporary=True)
         )
-        return super().destroy(request, *args, **kwargs)
+        s3_client = boto3.client("s3")
+
+        deleted_ids = []
+        for image in queryset:
+            try:
+                key = image.image.split("/", 3)[-1]
+                s3_client.delete_object(
+                    Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key
+                )
+                image.delete()
+                deleted_ids.append(image.id)
+            except Exception as e:
+                print(f"Error deleting image {image.id}: {str(e)}")
+
+        if len(deleted_ids) != len(image_ids):
+            not_deleted = set(image_ids) - set(deleted_ids)
+            return Response(
+                {
+                    "message": "일부 이미지가 삭제되지 않았습니다.",
+                    "deleted_ids": deleted_ids,
+                    "not_deleted_ids": list(not_deleted),
+                },
+                status=status.HTTP_PARTIAL_CONTENT,
+            )
+
+        return Response(
+            {
+                "message": "모든 이미지가 성공적으로 삭제되었습니다.",
+                "deleted_ids": deleted_ids,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 @extend_schema(
