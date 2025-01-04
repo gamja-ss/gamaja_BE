@@ -4,17 +4,58 @@ import boto3
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    OpenApiTypes,
+    extend_schema,
+)
 from rest_framework import generics, serializers, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from users.models import User
 
 from .models import TIL, TILImage
-from .serializers import TILDetailSerializer, TILListSerializer, TILSerializer
+from .serializers import TILDetailSerializer, TILListSerializer
 
 
-class UploadTempImagesAPI(generics.CreateAPIView):
+@extend_schema(
+    tags=["TIL"],
+    summary="임시 이미지 업로드",
+    description="TIL 작성을 위한 임시 이미지를 업로드합니다. 여러 이미지를 동시에 업로드할 수 있습니다.",
+    request={
+        "multipart/form-data": {
+            "type": "object",
+            "properties": {
+                "images": {
+                    "type": "array",
+                    "items": {"type": "string", "format": "binary"},
+                }
+            },
+        }
+    },
+    responses={
+        201: OpenApiExample(
+            "성공 응답",
+            value=[
+                {
+                    "image_id": 1,
+                    "image_url": "https://example.com/media/temp/uuid/image1.jpg",
+                },
+                {
+                    "image_id": 2,
+                    "image_url": "https://example.com/media/temp/uuid/image2.jpg",
+                },
+            ],
+        ),
+        400: OpenApiResponse(description="이미지가 제공되지 않음"),
+        500: OpenApiResponse(description="서버 오류"),
+    },
+)
+class UploadTempImagesView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
@@ -50,7 +91,45 @@ class UploadTempImagesAPI(generics.CreateAPIView):
         return Response(uploaded_images, status=status.HTTP_201_CREATED)
 
 
-class DeleteTempImagesAPI(generics.GenericAPIView):
+@extend_schema(
+    tags=["TIL"],
+    summary="임시 이미지 삭제",
+    description="업로드된 임시 이미지를 삭제합니다. 여러 이미지를 동시에 삭제할 수 있습니다.",
+    request={
+        "application/json": {
+            "type": "object",
+            "properties": {
+                "image_ids": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "삭제할 이미지의 ID 목록",
+                }
+            },
+            "example": {
+                "image_ids": [1, 2, 3],
+            },
+        }
+    },
+    responses={
+        200: OpenApiExample(
+            "성공 응답",
+            value={
+                "message": "모든 이미지가 성공적으로 삭제되었습니다.",
+                "deleted_ids": [1, 2, 3],
+            },
+        ),
+        206: OpenApiExample(
+            "부분 성공 응답",
+            value={
+                "message": "일부 이미지가 삭제되지 않았습니다.",
+                "deleted_ids": [1, 2],
+                "not_deleted_ids": [3],
+            },
+        ),
+        400: OpenApiResponse(description="삭제할 이미지 ID가 제공되지 않음"),
+    },
+)
+class DeleteTempImagesView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     queryset = TILImage.objects.all()
 
@@ -103,14 +182,35 @@ class DeleteTempImagesAPI(generics.GenericAPIView):
 @extend_schema(
     tags=["TIL"],
     summary="TIL 작성",
-    description="새로운 TIL을 작성합니다.",
+    description="새로운 TIL을 작성합니다. 이미지 ID 목록을 포함하여 TIL과 연결할 수 있습니다.",
+    request=TILDetailSerializer,
+    parameters=[
+        OpenApiParameter(
+            name="image_ids",
+            type=serializers.ListSerializer(child=serializers.IntegerField()),
+            location=OpenApiParameter.QUERY,
+            description="TIL에 연결할 이미지 ID 목록",
+            examples=[OpenApiExample("이미지 ID 예시", value=[1, 2, 3])],
+        )
+    ],
     responses={
-        201: OpenApiResponse(response=TILSerializer, description="TIL 작성 성공"),
+        201: OpenApiResponse(response=TILDetailSerializer, description="TIL 작성 성공"),
         400: OpenApiResponse(description="잘못된 요청"),
     },
+    examples=[
+        OpenApiExample(
+            "Example Request",
+            value={
+                "title": "오늘의 TIL",
+                "content": "오늘 배운 내용...",
+                "image_ids": [1, 2, 3],
+            },
+            request_only=True,
+        )
+    ],
 )
-class CreateTILAPI(generics.CreateAPIView):
-    serializer_class = TILSerializer
+class CreateTILView(generics.CreateAPIView):
+    serializer_class = TILDetailSerializer
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic
@@ -132,8 +232,13 @@ class CreateTILAPI(generics.CreateAPIView):
                 image.is_temporary = False
                 # 원본 이미지의 키 추출
                 original_key = image.image.replace(settings.MEDIA_URL, "")
+                # 파일 이름에 UUID를 추가하여 고유성 보장
+                file_name = original_key.split("/")[-1]
+                unique_id = uuid.uuid4().hex[:8]  # 8자리 고유 ID 생성
+                new_file_name = f"{unique_id}_{file_name}"
+
                 # 새 경로 생성
-                new_key = f'til/{TIL.id}/{original_key.split("/")[-1]}'
+                new_key = f"til/{TIL.id}/{new_file_name}"
 
                 s3_client = boto3.client("s3")
                 s3_client.copy_object(
@@ -161,16 +266,37 @@ class CreateTILAPI(generics.CreateAPIView):
 @extend_schema(
     tags=["TIL"],
     summary="TIL 수정",
-    description="기존 TIL을 수정합니다.",
+    description="기존 TIL을 수정합니다. 제목, 내용을 변경하고 이미지를 추가하거나 삭제할 수 있습니다.",
+    request=TILDetailSerializer,
+    parameters=[
+        OpenApiParameter(
+            name="image_ids",
+            type=serializers.ListSerializer(child=serializers.IntegerField()),
+            location=OpenApiParameter.QUERY,
+            description="TIL에 연결할 이미지 ID 목록. 기존 이미지 ID와 새로 추가할 이미지 ID를 모두 포함해야 합니다.",
+            examples=[OpenApiExample("이미지 ID 예시", value=[1, 2, 3])],
+        )
+    ],
     responses={
-        200: OpenApiResponse(response=TILSerializer, description="TIL 수정 성공"),
+        200: OpenApiResponse(response=TILDetailSerializer, description="TIL 수정 성공"),
         400: OpenApiResponse(description="잘못된 요청"),
         403: OpenApiResponse(description="권한 없음"),
         404: OpenApiResponse(description="TIL을 찾을 수 없음"),
     },
+    examples=[
+        OpenApiExample(
+            "요청 예시",
+            value={
+                "title": "수정된 TIL 제목",
+                "content": "수정된 TIL 내용...",
+                "image_ids": [1, 2, 4],  # 1, 2는 기존 이미지, 4는 새로 추가된 이미지
+            },
+            request_only=True,
+        )
+    ],
 )
-class UpdateTILAPI(generics.UpdateAPIView):
-    serializer_class = TILSerializer
+class UpdateTILView(generics.UpdateAPIView):
+    serializer_class = TILDetailSerializer
     permission_classes = [IsAuthenticated]
     queryset = TIL.objects.all()
 
@@ -208,7 +334,12 @@ class UpdateTILAPI(generics.UpdateAPIView):
                     # 새로 추가된 이미지
                     image.TIL = TIL
                     image.is_temporary = False
-                    new_path = f'til/{TIL.id}/{image.image.split("/")[-1]}'
+                    # 파일 이름에 UUID를 추가하여 고유성 보장
+                    unique_id = uuid.uuid4().hex[:8]  # 8자리 고유 ID 생성
+                    new_file_name = f"{unique_id}_{image.image.split("/")[-1]}"
+
+                    # 새 경로 생성
+                    new_path = f"til/{TIL.id}/{new_file_name}"
                     self.move_image_in_s3(image.image, new_path)
                     image.image = f"https://{settings.MEDIA_URL}/{new_path}"
                     image.save()
@@ -252,7 +383,7 @@ class UpdateTILAPI(generics.UpdateAPIView):
         404: OpenApiResponse(description="TIL을 찾을 수 없음"),
     },
 )
-class DeleteTILAPI(generics.DestroyAPIView):
+class DeleteTILView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = TIL.objects.all()
 
@@ -276,18 +407,53 @@ class DeleteTILAPI(generics.DestroyAPIView):
 
 class TILPagination(PageNumberPagination):
     page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 100
+    page_size_query_param = None
+    max_page_size = 10
 
 
-class UserTILListView(generics.ListAPIView):
+@extend_schema(
+    tags=["TIL"],
+    summary="TIL 리스트 조회",
+    description="특정 사용자의 TIL 리스트를 조회합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="nickname",
+            description="TIL 주인의 닉네임",
+            required=True,
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+        ),
+    ],
+    responses={200: TILListSerializer(many=True)},
+)
+class TILListView(generics.ListAPIView):
     serializer_class = TILListSerializer
     permission_classes = [AllowAny]
     pagination_class = TILPagination
-    queryset = TIL.objects.all().order_by("-created_at")
+
+    def get_queryset(self):
+        nickname = self.kwargs["nickname"]
+        user = get_object_or_404(User, nickname=nickname)
+        return TIL.objects.filter(user=user).order_by("-created_at")
 
 
+@extend_schema(
+    tags=["TIL"],
+    summary="TIL 상세 조회",
+    description="특정 사용자의 TIL를 상세 조회합니다.",
+    parameters=[
+        OpenApiParameter(
+            name="id",
+            description="TIL ID",
+            required=True,
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.PATH,
+        ),
+    ],
+    responses={200: TILDetailSerializer},
+)
 class TILDetailView(generics.RetrieveAPIView):
     queryset = TIL.objects.all()
     serializer_class = TILDetailSerializer
     permission_classes = [AllowAny]
+    lookup_field = "id"

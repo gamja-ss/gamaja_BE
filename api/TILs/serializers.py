@@ -3,13 +3,6 @@ from rest_framework import serializers
 from .models import TIL
 
 
-class TILSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TIL
-        fields = ["id", "title", "content", "created_at"]
-        read_only_fields = ["id", "created_at"]
-
-
 class TILListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TIL
@@ -17,7 +10,7 @@ class TILListSerializer(serializers.ModelSerializer):
 
 
 class TILDetailSerializer(serializers.ModelSerializer):
-    image_ids = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = TIL
