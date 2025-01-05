@@ -10,14 +10,11 @@ class TIL(TimeStampModel):
 
 
 class TILImage(TimeStampModel):
-    til = models.ForeignKey(
+    TIL = models.ForeignKey(
         TIL, on_delete=models.CASCADE, null=True, related_name="images"
     )
     image = models.URLField(max_length=500, null=False)  # S3 URL을 직접 저장
     is_temporary = models.BooleanField(default=True)
-
-    def __str__(self):
-        return f"{self.TIL.title} - {self.id}"
 
     @property
     def image_url(self):

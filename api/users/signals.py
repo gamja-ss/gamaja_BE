@@ -9,7 +9,7 @@ from .models import User
 
 @receiver(post_save, sender=User)
 def initialize_github_commit_info(sender, instance, created, **kwargs):
-    if created and instance.github_access_token and instance.github_username:
+    if created and instance.github_access_token and instance.username:
         set_initial_github_commits(instance)
 
 
