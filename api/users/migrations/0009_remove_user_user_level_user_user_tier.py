@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0008_user_followers_count_user_following_count'),
+        ("users", "0008_user_followers_count_user_following_count"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='user_level',
+            model_name="user",
+            name="user_level",
         ),
         migrations.AddField(
-            model_name='user',
-            name='user_tier',
-            field=models.CharField(default='Bronze5', max_length=25),
+            model_name="user",
+            name="user_tier",
+            field=models.CharField(default="Bronze5", max_length=25),
         ),
     ]

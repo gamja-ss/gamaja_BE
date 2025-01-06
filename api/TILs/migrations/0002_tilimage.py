@@ -5,25 +5,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('TILs', '0001_initial'),
+        ("TILs", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TILImage',
+            name="TILImage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('deleted_at', models.DateTimeField(null=True)),
-                ('image', models.URLField(max_length=500)),
-                ('is_temporary', models.BooleanField(default=True)),
-                ('til', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='TILs.til')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("deleted_at", models.DateTimeField(null=True)),
+                ("image", models.URLField(max_length=500)),
+                ("is_temporary", models.BooleanField(default=True)),
+                (
+                    "til",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="images",
+                        to="TILs.til",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

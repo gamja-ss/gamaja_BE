@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0009_remove_user_user_level_user_user_tier'),
+        ("users", "0009_remove_user_user_level_user_user_tier"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='bio',
+            model_name="user",
+            name="bio",
             field=models.CharField(max_length=255, null=True),
         ),
     ]

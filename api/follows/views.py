@@ -83,7 +83,6 @@ class FollowUnfollowMixin:
     },
 )
 class FollowView(FollowUnfollowMixin, generics.CreateAPIView):
-
     def create(self, request, nickname):
         user_to_follow = self.get_user_to_follow(nickname)
         self_check = self.check_self_action(user_to_follow, "팔로우")
@@ -124,7 +123,6 @@ class FollowView(FollowUnfollowMixin, generics.CreateAPIView):
     },
 )
 class UnfollowView(FollowUnfollowMixin, generics.DestroyAPIView):
-
     def destroy(self, request, nickname):
         user_to_unfollow = self.get_user_to_follow(nickname)
         self_check = self.check_self_action(user_to_unfollow, "언팔로우")
@@ -186,9 +184,7 @@ class RemoveFollowerView(generics.DestroyAPIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(
-                {
-                    "message": f"{follower_to_remove.nickname}님은 당신의 팔로워가 아닙니다."
-                },
+                {"message": f"{follower_to_remove.nickname}님은 당신의 팔로워가 아닙니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

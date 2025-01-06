@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 
 import os
 
+from challenges.consumers import ChallengeConsumer
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
@@ -20,7 +21,14 @@ application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
         "websocket": AuthMiddlewareStack(
-            URLRouter([path("ws/notifications/", NotificationConsumer.as_asgi())])
+            URLRouter(
+                [
+                    path("ws/notifications/", NotificationConsumer.as_asgi()),
+                    path(
+                        "ws/challenges/<int:challenge_id>/", ChallengeConsumer.as_asgi()
+                    ),
+                ]
+            )
         ),
     }
 )

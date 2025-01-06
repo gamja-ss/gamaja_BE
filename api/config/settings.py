@@ -309,9 +309,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [
-                f"redis://:{REDIS_PASSWORD}@redis:6379/0"
-            ],  # Redis URL에 인증 정보 포함
+            "hosts": [f"redis://:{REDIS_PASSWORD}@redis:6379/0"],  # Redis URL에 인증 정보 포함
         },
     },
 }

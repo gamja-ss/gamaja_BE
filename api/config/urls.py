@@ -35,4 +35,5 @@ urlpatterns = [
     path("coin/", include("coins.urls")),
     path("til/", include("TILs.urls")),
     path("item/", include("items.urls")),
+    path("challenge/", include("challenges.urls")),
 ]

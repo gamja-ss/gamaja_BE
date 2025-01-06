@@ -55,9 +55,7 @@ def set_initial_github_commits(user):
         Github.objects.create(
             user=user, date=user.github_initial_date, commit_num=total_commits
         )
-        print(
-            f"초기 GitHub 커밋 정보 설정 완료: 사용자 {user.id}, 커밋 수 {total_commits}"
-        )
+        print(f"초기 GitHub 커밋 정보 설정 완료: 사용자 {user.id}, 커밋 수 {total_commits}")
         return True
     return False
 
@@ -99,7 +97,5 @@ def update_user_github_commits(user):
         user=user, date=now.date(), defaults={"commit_num": total_commits}
     )
 
-    print(
-        f"GitHub 커밋 수 업데이트 성공: 사용자 {user.username}, 커밋 수 {total_commits}"
-    )
+    print(f"GitHub 커밋 수 업데이트 성공: 사용자 {user.username}, 커밋 수 {total_commits}")
     return github_record
