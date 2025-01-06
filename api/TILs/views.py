@@ -5,13 +5,9 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import (
-    OpenApiExample,
-    OpenApiParameter,
-    OpenApiResponse,
-    OpenApiTypes,
-    extend_schema,
-)
+from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
+                                   OpenApiResponse, OpenApiTypes,
+                                   extend_schema)
 from rest_framework import generics, serializers, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated

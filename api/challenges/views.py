@@ -4,19 +4,18 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
-    OpenApiTypes,
     extend_schema,
     extend_schema_view,
 )
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from users.models import User
 
 from .models import Challenge, ChallengeStatus
 from .serializers import (
     ChallengeCreateSerializer,
     ChallengeLogSerializer,
-    ChallengeRequestSerializer,
     ChallengeResponseSerializer,
     ChallengeResultSerializer,
     ChallengeSerializer,
@@ -25,7 +24,11 @@ from .serializers import (
 
 @extend_schema_view(
     list=extend_schema(description="수신/발신 챌린지 요청 리스트 조회"),
-    create=extend_schema(description="새로운 챌린지 생성"),
+    create=extend_schema(
+        description="새로운 챌린지 생성",
+        request=ChallengeCreateSerializer,
+        responses={201: ChallengeSerializer},
+    ),
     retrieve=extend_schema(description="특정 챌린지 상세 조회"),
     destroy=extend_schema(description="챌린지 삭제"),
 )
@@ -42,7 +45,37 @@ class ChallengeViewSet(viewsets.ModelViewSet):
             return ChallengeResultSerializer
         return ChallengeSerializer
 
-    # 챌린지 삭제(진행중은 예외처리)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_ids = serializer.validated_data.pop("user_ids")
+        request_user = request.user  # 챌린지 생성자
+
+        challenge = serializer.save()
+        challenge.participants.add(request_user)  # 생성자는 자동 참가
+
+        # 참가자 추가 및 웹소켓 요청 전송
+        users = User.objects.filter(id__in=user_ids)
+        challenge.participants.add(*users)
+
+        channel_layer = get_channel_layer()
+        for user in users:
+            async_to_sync(channel_layer.group_send)(
+                f"user_{user.id}",
+                {
+                    "type": "challenge.request",
+                    "message": {
+                        "text": f"{request_user.username}님이 챌린지 초대를 보냈습니다.",
+                        "challenge_id": challenge.id,
+                    },
+                },
+            )
+
+        return Response(
+            ChallengeSerializer(challenge).data, status=status.HTTP_201_CREATED
+        )
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.status == ChallengeStatus.ONGOING.value:
@@ -51,26 +84,6 @@ class ChallengeViewSet(viewsets.ModelViewSet):
             )
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        request=ChallengeRequestSerializer,
-        responses={200: {"message": "챌린지 요청 완료"}},
-        description="다른 유저에게 챌린지를 신청",
-    )
-    @action(detail=False, methods=["post"], url_path="request/(?P<user_id>[^/.]+)")
-    def challenge_request(self, request, user_id):
-        serializer = ChallengeRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f"user_{user_id}",
-                {
-                    "type": "challenge.request",
-                    "message": {"text": "새로운 챌린지 요청이 도착했습니다!"},
-                },
-            )
-            return Response({"message": "챌린지 요청 완료"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         request=ChallengeResponseSerializer,
@@ -82,22 +95,26 @@ class ChallengeViewSet(viewsets.ModelViewSet):
         serializer = ChallengeResponseSerializer(data=request.data)
         if serializer.is_valid():
             challenge = self.get_object()
+            user = request.user
             accepted = serializer.validated_data["accepted"]
 
             if accepted:
-                challenge.status = ChallengeStatus.ONGOING.value
+                challenge.participants.add(user)
                 challenge.save()
 
+                # WebSocket을 통해 챌린지 상태 업데이트
                 channel_layer = get_channel_layer()
                 async_to_sync(channel_layer.group_send)(
                     f"challenge_{challenge.id}",
-                    {"type": "challenge.start", "message": {"text": "챌린지가 시작되었습니다!"}},
+                    {
+                        "type": "challenge.update",
+                        "message": {"status": "accepted", "user_id": user.id},
+                    },
                 )
-                return Response({"message": "챌린지 수락"}, status=status.HTTP_200_OK)
+
+                return Response({"message": "챌린지 참가 완료"}, status=status.HTTP_200_OK)
             else:
-                challenge.status = ChallengeStatus.REJECTED.value
-                challenge.save()
-                return Response({"message": "챌린지 거절"}, status=status.HTTP_200_OK)
+                return Response({"message": "챌린지 참가 거절"}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
